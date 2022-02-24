@@ -9,9 +9,13 @@ declare namespace APIStayPeoples {
     floor?: string;
     room?: string;
     bed?: string;
-    status_staff?: string;
-    status_department?: string;
-    status_titles?: string;
+    manager?: { name: string; mobile: string; };
+    certification?: { no: string; address: string };
+    staff?: string;
+    departments?: string[];
+    titles?: string;
+    start?: string;
+    end?: string;
     is_temp?: number;
     created_at?: string | moment.Moment;
     loading_deleted?: boolean;
@@ -33,6 +37,8 @@ declare namespace APIStayPeoples {
     floor?: number;
     room?: number;
     bed?: number;
+    is_temp?: number;
+    status?: 'live' | 'leave';
   }
 
   type Loading = {
