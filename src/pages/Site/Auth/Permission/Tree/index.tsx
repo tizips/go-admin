@@ -1,5 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Card, Col, notification, Popconfirm, Row, Select, Table, Tag, Tooltip } from 'antd';
+import {
+  Button,
+  Card,
+  Col,
+  notification,
+  Popconfirm,
+  Row,
+  Select,
+  Table,
+  Tag,
+  Tooltip,
+} from 'antd';
 import Constants from '@/utils/Constants';
 import moment from 'moment';
 import { FormOutlined, RedoOutlined } from '@ant-design/icons';
@@ -19,7 +30,6 @@ const methods = {
 };
 
 const Tree: React.FC = () => {
-
   const { initialState } = useModel('@@initialState');
 
   const [editor, setEditor] = useState<APIAuthPermissions.Data | undefined>();
@@ -30,7 +40,10 @@ const Tree: React.FC = () => {
   const [loading, setLoading] = useState<APIAuthPermissions.Loading>({});
   const [active, setActive] = useState<APIAuthPermissions.Active>({});
 
-  const doLoop = (items: APIAuthPermissions.Data[], callback: (item: APIAuthPermissions.Data) => void) => {
+  const doLoop = (
+    items: APIAuthPermissions.Data[],
+    callback: (item: APIAuthPermissions.Data) => void,
+  ) => {
     for (const temp of items) {
       callback(temp);
       if (temp.children) doLoop(temp.children, callback);
@@ -55,7 +68,7 @@ const Tree: React.FC = () => {
       .then((response: APIResponse.Response<APIAuthPermissions.Data[]>) => {
         if (response.code === Constants.Success) {
           const temp: APIAuthPermissions.Data[] = response.data;
-          doLoop(temp, item => item.created_at = moment(item.created_at));
+          doLoop(temp, (item) => (item.created_at = moment(item.created_at)));
           setData(temp);
         }
       })
@@ -65,7 +78,7 @@ const Tree: React.FC = () => {
   const onDelete = (record: APIAuthPermissions.Data) => {
     // @ts-ignore
     let temp: APIAuthPermissions.Data[] = [...data];
-    Loop.byId(temp, record.id, (item: APIAuthPermissions.Data) => item.loading_deleted = true);
+    Loop.ById(temp, record.id, (item: APIAuthPermissions.Data) => (item.loading_deleted = true));
     setData(temp);
 
     doDelete(record.id)
@@ -79,7 +92,11 @@ const Tree: React.FC = () => {
       })
       .finally(() => {
         temp = [...data];
-        Loop.byId(temp, record.id, (item: APIAuthPermissions.Data) => item.loading_deleted = false);
+        Loop.ById(
+          temp,
+          record.id,
+          (item: APIAuthPermissions.Data) => (item.loading_deleted = false),
+        );
         setData(temp);
       });
   };
@@ -113,74 +130,135 @@ const Tree: React.FC = () => {
 
   return (
     <>
-      <Card title='权限列表' extra={<Row gutter={10}>
-        <Col>
-          <Select value={active.module} placeholder='模块'
-                  onChange={(value: number) => setActive({ ...active, module: value })}>
-            {
-              modules.map(item => (
-                <Select.Option key={item.id} value={item.id}>{item.name}</Select.Option>
-              ))
-            }
-          </Select>
-        </Col>
-        <Col>
-          <Tooltip title='刷新'>
-            <Button type='primary' icon={<RedoOutlined />} onClick={toTree} loading={loadingPaginate} />
-          </Tooltip>
-        </Col>
-        {
-          initialState?.permissions && initialState?.permissions?.indexOf('site.auth.permission.create') >= 0 ?
+      <Card
+        title="权限列表"
+        extra={
+          <Row gutter={10}>
             <Col>
-              <Tooltip title='创建'>
-                <Button type='primary' icon={<FormOutlined />} onClick={onCreate} />
+              <Select
+                value={active.module}
+                placeholder="模块"
+                onChange={(value: number) => setActive({ ...active, module: value })}
+              >
+                {modules.map((item) => (
+                  <Select.Option key={item.id} value={item.id}>
+                    {item.name}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Col>
+            <Col>
+              <Tooltip title="刷新">
+                <Button
+                  type="primary"
+                  icon={<RedoOutlined />}
+                  onClick={toTree}
+                  loading={loadingPaginate}
+                />
               </Tooltip>
-            </Col> : <></>
-        }
-      </Row>}>
-        <Table dataSource={data} rowKey='id' size='small'
-               loading={loadingPaginate} pagination={false}>
-          <Table.Column title='名称' dataIndex='name' />
-          <Table.Column title='标识' render={(record: APIAuthPermissions.Data) => (
-            <span className={styles.slug} style={{ color: initialState?.settings?.primaryColor }}>{record.slug}</span>
-          )} />
-          <Table.Column title='接口' align='right' render={(record: APIAuthPermissions.Data) => (
-            record.method ?
-              <Tag color={record.method && methods ? methods[record.method] : '#2db7f5'}>
-                {record.method?.toUpperCase()}
-              </Tag> : <></>
-          )} />
-          <Table.Column render={(record: APIAuthPermissions.Data) => (
-            record.path ?
-              <Tag className={styles.path} style={{ color: initialState?.settings?.primaryColor }}>{record.path}</Tag> :
+            </Col>
+            {initialState?.permissions &&
+            initialState?.permissions?.indexOf('site.auth.permission.create') >= 0 ? (
+              <Col>
+                <Tooltip title="创建">
+                  <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
+                </Tooltip>
+              </Col>
+            ) : (
               <></>
-          )} />
-          <Table.Column title='操作' align='center' width={100} render={(record: APIAuthPermissions.Data) => (
-            <>
-              {
-                initialState?.permissions && initialState?.permissions?.indexOf('site.auth.permission.update') >= 0 ?
-                  <Button type='link' onClick={() => onUpdate(record)}>编辑</Button> : <></>
-              }
-              {
-                initialState?.permissions && initialState?.permissions?.indexOf('site.auth.permission.delete') >= 0
-                && !record.children ?
+            )}
+          </Row>
+        }
+      >
+        <Table
+          dataSource={data}
+          rowKey="id"
+          size="small"
+          loading={loadingPaginate}
+          pagination={false}
+        >
+          <Table.Column title="名称" dataIndex="name" />
+          <Table.Column
+            title="标识"
+            render={(record: APIAuthPermissions.Data) => (
+              <span className={styles.slug} style={{ color: initialState?.settings?.primaryColor }}>
+                {record.slug}
+              </span>
+            )}
+          />
+          <Table.Column
+            title="接口"
+            align="right"
+            render={(record: APIAuthPermissions.Data) =>
+              record.method ? (
+                <Tag color={record.method && methods ? methods[record.method] : '#2db7f5'}>
+                  {record.method?.toUpperCase()}
+                </Tag>
+              ) : (
+                <></>
+              )
+            }
+          />
+          <Table.Column
+            render={(record: APIAuthPermissions.Data) =>
+              record.path ? (
+                <Tag
+                  className={styles.path}
+                  style={{ color: initialState?.settings?.primaryColor }}
+                >
+                  {record.path}
+                </Tag>
+              ) : (
+                <></>
+              )
+            }
+          />
+          <Table.Column
+            title="操作"
+            align="center"
+            width={100}
+            render={(record: APIAuthPermissions.Data) => (
+              <>
+                {initialState?.permissions &&
+                initialState?.permissions?.indexOf('site.auth.permission.update') >= 0 ? (
+                  <Button type="link" onClick={() => onUpdate(record)}>
+                    编辑
+                  </Button>
+                ) : (
+                  <></>
+                )}
+                {initialState?.permissions &&
+                initialState?.permissions?.indexOf('site.auth.permission.delete') >= 0 &&
+                !record.children ? (
                   <Popconfirm
-                    title='确定要删除该数据?'
-                    placement='leftTop'
+                    title="确定要删除该数据?"
+                    placement="leftTop"
                     onConfirm={() => onDelete(record)}
                   >
-                    <Button type='link' danger loading={record.loading_deleted}>删除</Button>
-                  </Popconfirm> : <></>
-              }
-            </>
-          )} />
+                    <Button type="link" danger loading={record.loading_deleted}>
+                      删除
+                    </Button>
+                  </Popconfirm>
+                ) : (
+                  <></>
+                )}
+              </>
+            )}
+          />
         </Table>
       </Card>
-      {
-        visible.editor != undefined ?
-          <Editor visible={visible.editor} params={editor} methods={methods} module={active.module}
-                  onSave={onSuccess} onCancel={onCancel} /> : <></>
-      }
+      {visible.editor != undefined ? (
+        <Editor
+          visible={visible.editor}
+          params={editor}
+          methods={methods}
+          module={active.module}
+          onSave={onSuccess}
+          onCancel={onCancel}
+        />
+      ) : (
+        <></>
+      )}
     </>
   );
 };

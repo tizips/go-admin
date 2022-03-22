@@ -1,5 +1,4 @@
 declare namespace APIStayPeoples {
-
   type Data = {
     id?: number;
     category?: string;
@@ -9,7 +8,7 @@ declare namespace APIStayPeoples {
     floor?: string;
     room?: string;
     bed?: string;
-    manager?: { name: string; mobile: string; };
+    manager?: { name: string; mobile: string };
     certification?: { no: string; address: string };
     staff?: string;
     departments?: string[];
@@ -17,17 +16,18 @@ declare namespace APIStayPeoples {
     start?: string;
     end?: string;
     is_temp?: number;
-    created_at?: string | moment.Moment;
+    remark?: string;
+    created_at?: string;
     loading_deleted?: boolean;
-  }
+  };
 
   type Visible = {
     create?: boolean;
-  }
+  };
 
   type Filter = {
     type?: 'name' | 'mobile' | 'room';
-  }
+  };
 
   type Search = {
     page?: number;
@@ -39,11 +39,10 @@ declare namespace APIStayPeoples {
     bed?: number;
     is_temp?: number;
     status?: 'live' | 'leave';
-  }
+  };
 
   type Loading = {
     floor?: boolean;
     bed?: boolean;
-  }
-
+  };
 }

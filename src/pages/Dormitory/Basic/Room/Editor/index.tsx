@@ -1,34 +1,47 @@
-import { Form, Input, Modal, notification, Select, Slider } from 'antd';
+import { Cascader, Form, Input, Modal, notification, Select, Slider } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { doCreate, doUpdate } from './service';
 import Constants from '@/utils/Constants';
 import { doFloorByOnline, doTypeByOnline } from '@/services/dormitory';
+import Loop from '@/utils/Loop';
 
 const Editor: React.FC<APIBasicRoom.Props> = (props) => {
-
   const init: APIBasicRoom.Former = {
     name: '',
-    building: undefined,
-    floor: undefined,
+    positions: undefined,
     type: undefined,
     order: 50,
-    is_furnish: 0,
+    is_furnish: 2,
     is_enable: 1,
+    is_public: 2,
   };
 
   const [former] = Form.useForm();
-  const [filter, setFilter] = useState<APIBasicRoom.Filter>({});
   const [loading, setLoading] = useState<APIBasicRoom.Loading>({});
-  const [floors, setFloors] = useState<APIResponse.Online[]>([]);
   const [types, setTypes] = useState<APIResponse.Online[]>([]);
+  const [positions, setPositions] = useState<APIData.Tree[]>([]);
+  const [isPublic, setIsPublic] = useState(init.is_public);
 
-  const toFloorsByOnline = () => {
-    setLoading({ ...loading, floor: true });
-    doFloorByOnline(filter.building)
-      .then((response: APIResponse.Response<APIResponse.Online[]>) => {
-        if (response.code == Constants.Success) setFloors(response.data);
-      })
-      .finally(() => setLoading({ ...loading, floor: false }));
+  const toFloorsByOnline = (id?: number) => {
+    doFloorByOnline(id, { is_public: 2 }).then(
+      (response: APIResponse.Response<APIResponse.Online[]>) => {
+        const data = [...positions];
+        Loop.ById(
+          data,
+          id,
+          (item: APIData.Tree) => {
+            item.children = [];
+            if (response.code == Constants.Success) {
+              response.data.forEach((value) =>
+                item.children?.push({ id: value.id, name: value.name }),
+              );
+            }
+          },
+          'building',
+        );
+        if (data !== positions) setPositions(data);
+      },
+    );
   };
 
   const toTypesByOnline = () => {
@@ -72,49 +85,57 @@ const Editor: React.FC<APIBasicRoom.Props> = (props) => {
   };
 
   const onSubmit = (values: APIBasicRoom.Former) => {
-
     const params: APIBasicRoom.Editor = {
       name: values.name,
-      floor: values.floor,
-      type: values.type,
       order: values.order,
       is_furnish: values.is_furnish,
       is_enable: values.is_enable,
+      is_public: values.is_public,
     };
+
+    if (!props.params && values.positions && values.positions.length > 0)
+      params.floor = values.positions[values.positions.length - 1];
+    if (values.is_public !== 1) params.type = values.type;
 
     if (props.params) toUpdate(params);
     else toCreate(params);
   };
 
-  const onChangeBuilding = (value: number) => {
-    setFilter({ ...filter, building: value });
+  const onPositions = (values: APIData.Tree[]) => {
+    const value = values[values.length - 1];
 
-    former.setFieldsValue({ floor: undefined });
+    if (value.children == undefined || value.children.length <= 0) {
+      if (value.object === 'building') toFloorsByOnline(value.id);
+    }
   };
 
   const toInit = () => {
-
-    setFilter({ ...filter, building: undefined });
-    setFloors([]);
-
     const data = init;
 
     if (props.params) {
       data.name = props.params.name;
-      data.building = 0;
-      data.floor = 0;
+      data.positions = [0, 0];
       data.order = props.params.order;
       data.type = props.params.type_id;
       data.is_furnish = props.params.is_furnish;
       data.is_enable = props.params.is_enable;
+      data.is_public = props.params.is_public;
     }
+
+    setIsPublic(data.is_public);
 
     former.setFieldsValue(data);
   };
 
   useEffect(() => {
-    if (filter.building) toFloorsByOnline();
-  }, [filter]);
+    if (props.visible && props.buildings && props.buildings.length > 0 && positions.length <= 0) {
+      const data: APIData.Tree[] = [];
+      props.buildings.forEach((item) =>
+        data.push({ id: item.id, object: 'building', name: item.name, isLeaf: false }),
+      );
+      setPositions(data);
+    }
+  }, [props.visible, props.buildings]);
 
   useEffect(() => {
     if (props.visible) {
@@ -124,63 +145,85 @@ const Editor: React.FC<APIBasicRoom.Props> = (props) => {
   }, [props.visible]);
 
   return (
-    <Modal title={props.params ? '修改' : '创建'} visible={props.visible} closable={false}
-           centered onOk={() => former.submit()}
-           maskClosable={false} onCancel={props.onCancel}
-           confirmLoading={loading.confirmed}>
+    <Modal
+      title={props.params ? '修改' : '创建'}
+      visible={props.visible}
+      closable={false}
+      centered
+      onOk={() => former.submit()}
+      maskClosable={false}
+      onCancel={props.onCancel}
+      confirmLoading={loading.confirmed}
+    >
       <Form form={former} initialValues={init} onFinish={onSubmit}>
-        <Form.Item label='名称' name='name' rules={[{ required: true }, { max: 20 }]}>
+        <Form.Item label="名称" name="name" rules={[{ required: true }, { max: 20 }]}>
           <Input />
         </Form.Item>
-        <Form.Item label='楼栋' name='building' rules={[{ required: true }]}>
-          <Select onChange={onChangeBuilding} disabled={!!props.params}>
-            {
-              props.params ?
-                <Select.Option value={0}>{props.params.building}</Select.Option> :
-                props.buildings?.map(item => (
-                  <Select.Option key={item.id} value={item.id}>{item.name}</Select.Option>
-                ))
-            }
-          </Select>
-        </Form.Item>
-        {
-          floors && floors.length > 0 || props.params ?
-            <Form.Item label='楼层' name='floor' rules={[{ required: true }]}>
-              <Select loading={loading.floor} disabled={!!props.params}>
+        {props.params ? (
+          <Form.Item label="位置" name="positions" required>
+            <Cascader
+              options={[
                 {
-                  props.params ?
-                    <Select.Option value={0}>{props.params.floor}</Select.Option> :
-                    floors.map(item => (
-                      <Select.Option key={item.id} value={item.id}>{item.name}</Select.Option>
-                    ))
-                }
-              </Select>
-            </Form.Item> : <></>
-        }
-        <Form.Item label='房型' name='type' rules={[{ required: true }]}>
-          <Select loading={loading.type}>
-            {
-              types.map(item => (
-                <Select.Option key={item.id} value={item.id}>{item.name}</Select.Option>
-              ))
-            }
-          </Select>
-        </Form.Item>
-        <Form.Item label='排序' name='order' rules={[{ required: true }, { type: 'number' }]}>
+                  id: 0,
+                  name: props.params.building,
+                  children: [{ id: 0, name: props.params.floor }],
+                },
+              ]}
+              fieldNames={{ label: 'name', value: 'id' }}
+              disabled
+            />
+          </Form.Item>
+        ) : (
+          <Form.Item label="位置" name="positions" rules={[{ required: true }]}>
+            <Cascader
+              options={positions}
+              loadData={onPositions}
+              fieldNames={{ label: 'name', value: 'id' }}
+            />
+          </Form.Item>
+        )}
+        {isPublic !== 1 ? (
+          <Form.Item label="房型" name="type" rules={[{ required: true }]}>
+            <Select loading={loading.type}>
+              {types.map((item) => (
+                <Select.Option key={item.id} value={item.id}>
+                  {item.name}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+        ) : (
+          <></>
+        )}
+        <Form.Item label="排序" name="order" rules={[{ required: true }, { type: 'number' }]}>
           <Slider min={1} max={99} />
         </Form.Item>
-        <Form.Item label='装修' name='is_furnish' rules={[{ required: true }]}>
+        {isPublic !== 1 ? (
+          <Form.Item label="装修" name="is_furnish" rules={[{ required: true }]}>
+            <Select>
+              <Select.Option value={1}>是</Select.Option>
+              <Select.Option value={2}>否</Select.Option>
+            </Select>
+          </Form.Item>
+        ) : (
+          <></>
+        )}
+        <Form.Item label="启用" name="is_enable" rules={[{ required: true }]}>
           <Select>
             <Select.Option value={1}>是</Select.Option>
-            <Select.Option value={0}>否</Select.Option>
+            <Select.Option value={2}>否</Select.Option>
           </Select>
         </Form.Item>
-        <Form.Item label='启用' name='is_enable' rules={[{ required: true }]}>
-          <Select>
-            <Select.Option value={1}>是</Select.Option>
-            <Select.Option value={0}>否</Select.Option>
-          </Select>
-        </Form.Item>
+        {!props.params ? (
+          <Form.Item label="公共" name="is_public" rules={[{ required: true }]}>
+            <Select onChange={(value) => setIsPublic(value)}>
+              <Select.Option value={1}>公共区域</Select.Option>
+              <Select.Option value={2}>非公共区域</Select.Option>
+            </Select>
+          </Form.Item>
+        ) : (
+          <></>
+        )}
       </Form>
     </Modal>
   );

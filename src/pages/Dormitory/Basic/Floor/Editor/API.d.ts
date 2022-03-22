@@ -1,5 +1,4 @@
 declare namespace APIBasicFloor {
-
   type Props = {
     visible?: boolean;
     params?: APIBasicFloors.Data;
@@ -9,24 +8,25 @@ declare namespace APIBasicFloor {
     onUpdate?: () => void;
     onSave?: () => void;
     onCancel?: () => void;
-  }
+  };
 
   type Editor = {
     name?: string;
     building?: number;
     order?: number;
     is_enable?: number;
-  }
+    is_public?: number;
+  };
 
   type Former = {
     name?: string;
     building?: number;
     order?: number;
     is_enable?: number;
-  }
+    is_public?: number;
+  };
 
   type Loading = {
     confirmed?: boolean;
-  }
-
+  };
 }

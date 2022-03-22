@@ -9,7 +9,6 @@ import { doDelete, doPaginate } from './service';
 import Loop from '@/utils/Loop';
 
 const Paginate: React.FC = () => {
-
   const { initialState } = useModel('@@initialState');
 
   const [search, setSearch] = useState<APIAuthRoles.Search>({});
@@ -24,8 +23,13 @@ const Paginate: React.FC = () => {
     doPaginate(search)
       .then((response: APIResponse.Paginate<APIAuthRoles.Data[]>) => {
         if (response.code === Constants.Success) {
-          setPaginate({ size: response.data.size, page: response.data.page, total: response.data.total });
-          if (response.data.data) response.data.data.forEach(item => item.created_at = moment(item.created_at));
+          setPaginate({
+            size: response.data.size,
+            page: response.data.page,
+            total: response.data.total,
+          });
+          if (response.data.data)
+            response.data.data.forEach((item) => (item.created_at = moment(item.created_at)));
           setData(response.data.data);
         }
       })
@@ -35,7 +39,7 @@ const Paginate: React.FC = () => {
   const onDelete = (record: APIAuthRoles.Data) => {
     // @ts-ignore
     let temp: APIAuthRoles.Data[] = [...data];
-    Loop.byId(temp, record.id, (item: APIAuthRoles.Data) => item.loading_deleted = true);
+    Loop.ById(temp, record.id, (item: APIAuthRoles.Data) => (item.loading_deleted = true));
     setData(temp);
 
     doDelete(record.id)
@@ -49,7 +53,7 @@ const Paginate: React.FC = () => {
       })
       .finally(() => {
         temp = [...data];
-        Loop.byId(temp, record.id, (item: APIAuthRoles.Data) => item.loading_deleted = false);
+        Loop.ById(temp, record.id, (item: APIAuthRoles.Data) => (item.loading_deleted = false));
         setData(temp);
       });
   };
@@ -79,60 +83,90 @@ const Paginate: React.FC = () => {
 
   return (
     <>
-
-      <Card title='角色列表' extra={<Row gutter={10}>
-        <Col>
-          <Tooltip title='刷新'>
-            <Button type='primary' icon={<RedoOutlined />} onClick={toPaginate} loading={loadingPaginate} />
-          </Tooltip>
-        </Col>
-        {
-          initialState?.permissions && initialState?.permissions?.indexOf('site.auth.role.create') >= 0 ?
+      <Card
+        title="角色列表"
+        extra={
+          <Row gutter={10}>
             <Col>
-              <Tooltip title='创建'>
-                <Button type='primary' icon={<FormOutlined />} onClick={onCreate} />
+              <Tooltip title="刷新">
+                <Button
+                  type="primary"
+                  icon={<RedoOutlined />}
+                  onClick={toPaginate}
+                  loading={loadingPaginate}
+                />
               </Tooltip>
-            </Col> : <></>
+            </Col>
+            {initialState?.permissions &&
+            initialState?.permissions?.indexOf('site.auth.role.create') >= 0 ? (
+              <Col>
+                <Tooltip title="创建">
+                  <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
+                </Tooltip>
+              </Col>
+            ) : (
+              <></>
+            )}
+          </Row>
         }
-      </Row>}>
-        <Table dataSource={data} rowKey='id'
-               loading={loadingPaginate}
-               pagination={{
-                 current: paginate.page,
-                 pageSize: paginate.size,
-                 total: paginate.total,
-                 onChange: (page: number) => setSearch({ ...search, page }),
-               }}>
-          <Table.Column title='名称' dataIndex='name' />
-          <Table.Column title='简介' dataIndex='summary' />
-          <Table.Column title='创建时间' render={(record: APIAuthRoles.Data) => (
-            moment.isMoment(record.created_at) && record.created_at.format('YYYY/MM/DD HH:mm')
-          )} />
-          <Table.Column title='操作' align='center' width={100} render={(record: APIAuthAdmins.Data) => (
-            <>
-              {
-                initialState?.permissions && initialState?.permissions?.indexOf('site.auth.role.update') >= 0 ?
-                  <Button type='link' onClick={() => onUpdate(record)}>编辑</Button> : <></>
-              }
-              {
-                initialState?.permissions && initialState?.permissions?.indexOf('site.auth.role.delete') >= 0 ?
+      >
+        <Table
+          dataSource={data}
+          rowKey="id"
+          loading={loadingPaginate}
+          pagination={{
+            current: paginate.page,
+            pageSize: paginate.size,
+            total: paginate.total,
+            onChange: (page: number) => setSearch({ ...search, page }),
+          }}
+        >
+          <Table.Column title="名称" dataIndex="name" />
+          <Table.Column title="简介" dataIndex="summary" />
+          <Table.Column
+            title="创建时间"
+            render={(record: APIAuthRoles.Data) =>
+              moment.isMoment(record.created_at) && record.created_at.format('YYYY/MM/DD HH:mm')
+            }
+          />
+          <Table.Column
+            title="操作"
+            align="center"
+            width={100}
+            render={(record: APIAuthAdmins.Data) => (
+              <>
+                {initialState?.permissions &&
+                initialState?.permissions?.indexOf('site.auth.role.update') >= 0 ? (
+                  <Button type="link" onClick={() => onUpdate(record)}>
+                    编辑
+                  </Button>
+                ) : (
+                  <></>
+                )}
+                {initialState?.permissions &&
+                initialState?.permissions?.indexOf('site.auth.role.delete') >= 0 ? (
                   <Popconfirm
-                    title='确定要删除该数据?'
-                    placement='leftTop'
+                    title="确定要删除该数据?"
+                    placement="leftTop"
                     onConfirm={() => onDelete(record)}
                   >
-                    <Button type='link' danger loading={record.loading_deleted}>删除</Button>
-                  </Popconfirm> : <></>
-              }
-            </>
-          )} />
+                    <Button type="link" danger loading={record.loading_deleted}>
+                      删除
+                    </Button>
+                  </Popconfirm>
+                ) : (
+                  <></>
+                )}
+              </>
+            )}
+          />
         </Table>
       </Card>
-      {
-        visible.editor != undefined ?
-          <Editor visible={visible.editor} params={editor} onSave={onSuccess}
-                  onCancel={onCancel} /> : <></>
-      }
+      {visible.editor != undefined ? (
+        <Editor visible={visible.editor} params={editor} onSave={onSuccess} onCancel={onCancel} />
+      ) : (
+        <></>
+      )}
     </>
   );
 };

@@ -21,7 +21,9 @@ export default {
 
   MOBILE: /^1[2-9][0-9]{9}$/,
 
-  COST: /^\d+(\.\d{1,2})*$/,
+  COST: /^[1-9]\d*(\.\d{1,2})*$/,
+
+  INTEGER: /^[1-9]\d*$/,
 
   FRACTION: /^\d+$/,
 

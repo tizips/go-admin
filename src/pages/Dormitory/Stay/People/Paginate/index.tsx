@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
   Button,
   Card,
+  Cascader,
   Col,
   Descriptions,
   Input,
@@ -23,7 +24,6 @@ import { doBuildingByOnline, doFloorByOnline } from '@/services/dormitory';
 import Loop from '@/utils/Loop';
 
 const Paginate: React.FC = () => {
-
   const { initialState } = useModel('@@initialState');
 
   const [filter, setFilter] = useState<APIStayPeoples.Filter>({});
@@ -31,30 +31,41 @@ const Paginate: React.FC = () => {
   const [loadingPaginate, setLoadingPaginate] = useState(false);
   const [visible, setVisible] = useState<APIStayPeoples.Visible>({});
   const [buildings, setBuildings] = useState<APIResponse.Online[]>([]);
-  const [floors, setFloors] = useState<APIResponse.Online[]>([]);
+  const [positions, setPositions] = useState<APIData.Tree[]>([]);
   const [data, setData] = useState<APIStayPeoples.Data[]>();
-  const [loading, setLoading] = useState<APIStayPeoples.Loading>({});
   const [paginate, setPaginate] = useState<APIData.Paginate>({});
   const [expands, setExpands] = useState<any[]>([]);
 
   const toBuildingsByOnline = () => {
-    doBuildingByOnline()
-      .then((response: APIResponse.Response<APIResponse.Online[]>) => {
+    doBuildingByOnline({ is_public: 2 }).then(
+      (response: APIResponse.Response<APIResponse.Online[]>) => {
         if (response.code == Constants.Success) {
           setBuildings(response.data || []);
         }
-      });
+      },
+    );
   };
 
-  const toFloorsByOnline = () => {
-    setLoading({ ...loading, floor: true });
-    doFloorByOnline(search.building)
-      .then((response: APIResponse.Response<APIResponse.Online[]>) => {
-        if (response.code == Constants.Success) {
-          setFloors(response.data || []);
-        }
-      })
-      .finally(() => setLoading({ ...loading, floor: false }));
+  const toFloorsByOnline = (id?: number) => {
+    doFloorByOnline(id, { is_public: 2 }).then(
+      (response: APIResponse.Response<APIResponse.Online[]>) => {
+        const temp = [...positions];
+        Loop.ById(
+          temp,
+          id,
+          (item: APIData.Tree) => {
+            item.children = [];
+            if (response.code == Constants.Success) {
+              response.data.forEach((value) =>
+                item.children?.push({ id: value.id, name: value.name }),
+              );
+            }
+          },
+          'building',
+        );
+        if (data !== positions) setPositions(temp);
+      },
+    );
   };
 
   const toPaginate = () => {
@@ -62,10 +73,14 @@ const Paginate: React.FC = () => {
     doPaginate(search)
       .then((response: APIResponse.Paginate<APIStayPeoples.Data[]>) => {
         if (response.code === Constants.Success) {
-          setPaginate({ page: response.data.page, total: response.data.total, size: response.data.size });
+          setPaginate({
+            page: response.data.page,
+            total: response.data.total,
+            size: response.data.size,
+          });
           setData(response.data.data || []);
           const ids: any[] = [];
-          if (response.data.data) response.data.data.forEach(item => ids.push(item.id));
+          if (response.data.data) response.data.data.forEach((item) => ids.push(item.id));
           setExpands(ids);
         }
       })
@@ -75,7 +90,7 @@ const Paginate: React.FC = () => {
   const onDelete = (record: APIStayPeoples.Data) => {
     if (data) {
       const temp: APIStayPeoples.Data[] = [...data];
-      Loop.byId(temp, record.id, (item: APIStayPeoples.Data) => item.loading_deleted = true);
+      Loop.ById(temp, record.id, (item: APIStayPeoples.Data) => (item.loading_deleted = true));
       setData(temp);
     }
 
@@ -91,7 +106,7 @@ const Paginate: React.FC = () => {
       .finally(() => {
         if (data) {
           const temp: APIStayPeoples.Data[] = [...data];
-          Loop.byId(temp, record.id, (item: APIStayPeoples.Data) => item.loading_deleted = false);
+          Loop.ById(temp, record.id, (item: APIStayPeoples.Data) => (item.loading_deleted = false));
           setData(temp);
         }
       });
@@ -141,14 +156,35 @@ const Paginate: React.FC = () => {
   //     });
   // };
 
+  const onPositions = (values: APIData.Tree[]) => {
+    const value = values[values.length - 1];
+    if (value.children == undefined || value.children.length <= 0) {
+      if (value.object === 'building') toFloorsByOnline(value.id);
+    }
+  };
+
+  const onChangePosition = (values: any[]) => {
+    if (!values || values.length <= 0)
+      setSearch({ ...search, building: undefined, floor: undefined, page: undefined });
+    else if (values.length >= 2)
+      setSearch({ ...search, building: undefined, floor: values[1], page: undefined });
+    else if (values.length >= 1)
+      setSearch({ ...search, building: values[0], floor: undefined, page: undefined });
+  };
+
   useEffect(() => {
     if (search.status) toPaginate();
   }, [search]);
 
   useEffect(() => {
-    if (search.building) toFloorsByOnline();
-    else setFloors([]);
-  }, [search.building]);
+    if (buildings && buildings.length > 0 && positions.length <= 0) {
+      const temp: APIData.Tree[] = [];
+      buildings.forEach((item) =>
+        temp.push({ id: item.id, object: 'building', name: item.name, isLeaf: false }),
+      );
+      setPositions(temp);
+    }
+  }, [buildings]);
 
   useEffect(() => {
     if (buildings.length <= 0) toBuildingsByOnline();
@@ -157,154 +193,209 @@ const Paginate: React.FC = () => {
   const toRenderExpandable = (record: APIStayPeoples.Data) => {
     return (
       <Descriptions>
-        <Descriptions.Item label='办理时间'>
+        <Descriptions.Item label="办理时间">
           {record.created_at && moment(record.created_at).format('YYYY/MM/DD')}
         </Descriptions.Item>
-        <Descriptions.Item label='入住时间'>
+        <Descriptions.Item label="入住时间">
           {record.start ? moment(record.start).format('YYYY/MM/DD') : '-'}
         </Descriptions.Item>
-        <Descriptions.Item label='预离时间'>
+        <Descriptions.Item label="预离时间">
           {record.end ? moment(record.end).format('YYYY/MM/DD') : '-'}
         </Descriptions.Item>
-        {record.manager || record.titles || record.departments && record.departments.length > 0 ?
+        {record.manager ||
+        record.titles ||
+        (record.departments && record.departments.length > 0) ? (
           <>
-            <Descriptions.Item label='直系领导'>
+            <Descriptions.Item label="直系领导">
               {record.manager ? `${record.manager.name}「${record.manager.mobile}」` : '-'}
             </Descriptions.Item>
-            <Descriptions.Item label='职位名称'>{record.titles || '-'}</Descriptions.Item>
-            <Descriptions.Item label='所属部门'>
-              {record.departments && record.departments.length > 0 ?
+            <Descriptions.Item label="职位名称">{record.titles || '-'}</Descriptions.Item>
+            <Descriptions.Item label="所属部门">
+              {record.departments && record.departments.length > 0 ? (
                 record.departments.map((item, idx) => (
-                  <Tag key={idx} color='green'>
+                  <Tag key={idx} color="green">
                     {item}
                   </Tag>
-                )) : <>-</>
-              }
+                ))
+              ) : (
+                <>-</>
+              )}
             </Descriptions.Item>
-          </> : <></>
-        }
-        {record.certification ?
+          </>
+        ) : (
+          <></>
+        )}
+        {record.certification ? (
           <>
-            <Descriptions.Item label='证件号码'>{record.certification?.no}</Descriptions.Item>
-            <Descriptions.Item label='证件住址' span={2}>
+            <Descriptions.Item label="证件号码">{record.certification?.no}</Descriptions.Item>
+            <Descriptions.Item label="证件住址" span={2}>
               {record.certification?.address}
             </Descriptions.Item>
-          </> : <></>
-        }
+          </>
+        ) : (
+          <></>
+        )}
+        {record.remark ? (
+          <Descriptions.Item label="备注" span={3}>
+            {record.remark}
+          </Descriptions.Item>
+        ) : (
+          <></>
+        )}
       </Descriptions>
     );
   };
 
   return (
     <>
-      <Card title='人员列表' extra={<Row gutter={[10, 10]}>
-        {
-          floors && floors.length > 0 ?
+      <Card
+        title="人员列表"
+        extra={
+          <Row gutter={[10, 10]} justify="end">
             <Col>
-              <Select onChange={floor => setSearch({ ...search, floor, page: undefined })}
-                      allowClear loading={loading.floor} placeholder='楼层筛选'>
-                {
-                  floors.map(item => (
-                    <Select.Option key={item.id} value={item.id}>{item.name}</Select.Option>
-                  ))
-                }
+              <Select
+                placeholder="临时"
+                allowClear
+                onChange={(is_temp) => setSearch({ ...search, is_temp, page: undefined })}
+              >
+                <Select.Option value={1}>是</Select.Option>
+                <Select.Option value={2}>否</Select.Option>
               </Select>
-            </Col> : <></>
-        }
-        {
-          buildings &&
-          <Col>
-            <Select onChange={building => setSearch({ ...search, building, page: undefined })} allowClear
-                    placeholder='楼栋筛选'>
-              {
-                buildings.map(item => (
-                  <Select.Option key={item.id} value={item.id}>{item.name}</Select.Option>
-                ))
-              }
-            </Select>
-          </Col>
-        }
-        <Col>
-          <Select placeholder='临时' allowClear
-                  onChange={is_temp => setSearch({ ...search, is_temp, page: undefined })}>
-            <Select.Option value={0}>否</Select.Option>
-            <Select.Option value={1}>是</Select.Option>
-          </Select>
-        </Col>
-        <Col>
-          <Select value={search.status} placeholder='状态'
-                  onChange={status => setSearch({ ...search, status, page: undefined })}>
-            <Select.Option value='live'>在住</Select.Option>
-            <Select.Option value='leave'>离宿</Select.Option>
-          </Select>
-        </Col>
-        <Col>
-          <Input.Group compact>
-            <Select value={filter.type || 'name'} style={{ width: '30%' }}
-                    onChange={type => setFilter({ ...filter, type })}>
-              <Select.Option value='name'>姓名</Select.Option>
-              <Select.Option value='mobile'>电话</Select.Option>
-              <Select.Option value='room'>房号</Select.Option>
-            </Select>
-            <Input.Search allowClear enterButton style={{ width: '70%' }}
-                          onSearch={keyword => setSearch({ ...search, type: filter.type, keyword, page: undefined })} />
-          </Input.Group>
-        </Col>
-        <Col>
-          <Tooltip title='刷新'>
-            <Button type='primary' icon={<RedoOutlined />} onClick={toPaginate} loading={loadingPaginate} />
-          </Tooltip>
-        </Col>
-        {
-          initialState?.permissions && initialState?.permissions?.indexOf('dormitory.basic.bed.create') >= 0 ?
+            </Col>
             <Col>
-              <Tooltip title='创建'>
-                <Button type='primary' icon={<FormOutlined />} onClick={onCreate} />
+              <Cascader
+                options={positions}
+                loadData={onPositions}
+                onChange={onChangePosition}
+                fieldNames={{ label: 'name', value: 'id' }}
+                changeOnSelect
+                placeholder="位置选择"
+              />
+            </Col>
+            <Col>
+              <Select
+                value={search.status}
+                placeholder="状态"
+                onChange={(status) => setSearch({ ...search, status, page: undefined })}
+              >
+                <Select.Option value="live">在住</Select.Option>
+                <Select.Option value="leave">离宿</Select.Option>
+              </Select>
+            </Col>
+            <Col>
+              <Input.Group compact>
+                <Select
+                  value={filter.type || 'name'}
+                  style={{ width: '30%' }}
+                  onChange={(type) => setFilter({ ...filter, type })}
+                >
+                  <Select.Option value="name">姓名</Select.Option>
+                  <Select.Option value="mobile">电话</Select.Option>
+                  <Select.Option value="room">房号</Select.Option>
+                </Select>
+                <Input.Search
+                  allowClear
+                  enterButton
+                  style={{ width: '70%' }}
+                  onSearch={(keyword) =>
+                    setSearch({ ...search, type: filter.type, keyword, page: undefined })
+                  }
+                />
+              </Input.Group>
+            </Col>
+            <Col>
+              <Tooltip title="刷新">
+                <Button
+                  type="primary"
+                  icon={<RedoOutlined />}
+                  onClick={toPaginate}
+                  loading={loadingPaginate}
+                />
               </Tooltip>
-            </Col> : <></>
+            </Col>
+            {initialState?.permissions &&
+            initialState?.permissions?.indexOf('dormitory.basic.bed.create') >= 0 ? (
+              <Col>
+                <Tooltip title="创建">
+                  <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
+                </Tooltip>
+              </Col>
+            ) : (
+              <></>
+            )}
+          </Row>
         }
-      </Row>}>
-        <Table dataSource={data} rowKey='id' loading={loadingPaginate}
-               expandable={{
-                 expandIcon: () => <VerticalLeftOutlined style={{ color: '#1890ff' }} />,
-                 expandedRowKeys: expands,
-                 expandedRowRender: toRenderExpandable,
-               }}
-               pagination={{
-                 pageSize: paginate.size,
-                 current: paginate.page,
-                 total: paginate.total,
-                 onChange: page => setSearch({ ...search, page }),
-               }}>
-          <Table.Column title='姓名' dataIndex='name' />
-          <Table.Column title='房间' key='building' render={(record: APIStayPeoples.Data) =>
-            `${record.building}-${record.floor}-${record.room}-${record.bed}`
-          } />
-          <Table.Column title='类型' dataIndex='category' />
-          <Table.Column title='手机号' dataIndex='mobile' />
-          <Table.Column title='临时' align='center' render={(record: APIStayPeoples.Data) => (
-            <Tag color={record.is_temp === 0 ? '#87d068' : '#f50'}>{record.is_temp === 0 ? '正式' : '临时'}</Tag>
-          )} />
-          <Table.Column align='center' width={100} render={(record: APIStayPeoples.Data) => (
-            <>
-              {
-                initialState?.permissions && initialState?.permissions?.indexOf('dormitory.live.live.leave') >= 0 ?
+      >
+        <Table
+          dataSource={data}
+          rowKey="id"
+          loading={loadingPaginate}
+          expandable={{
+            expandIcon: () => <VerticalLeftOutlined style={{ color: '#1890ff' }} />,
+            expandedRowKeys: expands,
+            expandedRowRender: toRenderExpandable,
+          }}
+          pagination={{
+            pageSize: paginate.size,
+            current: paginate.page,
+            total: paginate.total,
+            showSizeChanger: false,
+            onChange: (page) => setSearch({ ...search, page }),
+          }}
+        >
+          <Table.Column title="姓名" dataIndex="name" />
+          <Table.Column
+            title="房间"
+            key="building"
+            render={(record: APIStayPeoples.Data) =>
+              `${record.building}-${record.floor}-${record.room}-${record.bed}`
+            }
+          />
+          <Table.Column title="类型" dataIndex="category" />
+          <Table.Column title="手机号" dataIndex="mobile" />
+          <Table.Column
+            title="临时"
+            align="center"
+            render={(record: APIStayPeoples.Data) => (
+              <Tag color={record.is_temp === 2 ? '#87d068' : '#f50'}>
+                {record.is_temp === 2 ? '正式' : '临时'}
+              </Tag>
+            )}
+          />
+          <Table.Column
+            align="center"
+            width={100}
+            render={(record: APIStayPeoples.Data) => (
+              <>
+                {initialState?.permissions &&
+                initialState?.permissions?.indexOf('dormitory.live.live.leave') >= 0 ? (
                   <Popconfirm
-                    title='确定要删除该数据?'
-                    placement='leftTop'
+                    title="确定要删除该数据?"
+                    placement="leftTop"
                     onConfirm={() => onDelete(record)}
                   >
-                    <Button type='link' danger loading={record.loading_deleted}>删除</Button>
-                  </Popconfirm> : <></>
-              }
-            </>
-          )} />
+                    <Button type="link" danger loading={record.loading_deleted}>
+                      删除
+                    </Button>
+                  </Popconfirm>
+                ) : (
+                  <></>
+                )}
+              </>
+            )}
+          />
         </Table>
       </Card>
-      {
-        visible.create != undefined ?
-          <Create visible={visible.create} buildings={buildings} onCreate={onSuccess} onCancel={onCancel} /> : <></>
-      }
+      {visible.create != undefined ? (
+        <Create
+          visible={visible.create}
+          buildings={buildings}
+          onCreate={onSuccess}
+          onCancel={onCancel}
+        />
+      ) : (
+        <></>
+      )}
     </>
   );
 };

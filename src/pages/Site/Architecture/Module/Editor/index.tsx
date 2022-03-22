@@ -58,7 +58,6 @@ const Editor: React.FC<APIArchitectureModule.Props> = (props) => {
   };
 
   const toInitByUpdate = () => {
-
     const data: APIArchitectureModule.Former = {
       slug: props.params?.slug,
       name: props.params?.name,
@@ -90,19 +89,19 @@ const Editor: React.FC<APIArchitectureModule.Props> = (props) => {
       confirmLoading={loading.confirmed}
     >
       <Form form={former} initialValues={init} onFinish={onSubmit}>
-        <Form.Item label='名称' name='name' rules={[{ required: true }, { max: 20 }]}>
+        <Form.Item label="名称" name="name" rules={[{ required: true }, { max: 20 }]}>
           <Input />
         </Form.Item>
-        <Form.Item label='标示' name='slug' rules={[{ required: true }, { max: 20 }]}>
+        <Form.Item label="标示" name="slug" rules={[{ required: true }, { max: 20 }]}>
           <Input />
         </Form.Item>
-        <Form.Item label='排序' name='order' rules={[{ required: true }, { type: 'number' }]}>
+        <Form.Item label="排序" name="order" rules={[{ required: true }, { type: 'number' }]}>
           <Slider min={1} max={99} />
         </Form.Item>
-        <Form.Item label='启用' name='is_enable' rules={[{ required: true }]}>
+        <Form.Item label="启用" name="is_enable" rules={[{ required: true }]}>
           <Select>
             <Select.Option value={1}>是</Select.Option>
-            <Select.Option value={0}>否</Select.Option>
+            <Select.Option value={2}>否</Select.Option>
           </Select>
         </Form.Item>
       </Form>

@@ -7,7 +7,6 @@ import { useModel } from '@@/plugin-model/useModel';
 import { doRoleByEnable } from '@/services/site';
 
 const Editor: React.FC<APIAuthAdmin.Props> = (props) => {
-
   const init: APIAuthAdmin.Former = {
     username: '',
     nickname: '',
@@ -111,8 +110,8 @@ const Editor: React.FC<APIAuthAdmin.Props> = (props) => {
       <Form form={former} initialValues={init} onFinish={onSubmit} labelCol={{ span: 4 }}>
         {!props.params ? (
           <Form.Item
-            label='账号'
-            name='username'
+            label="账号"
+            name="username"
             rules={[{ required: true }, { pattern: RegExp(Pattern.ADMIN_USERNAME) }]}
           >
             <Input />
@@ -120,21 +119,21 @@ const Editor: React.FC<APIAuthAdmin.Props> = (props) => {
         ) : (
           <></>
         )}
-        <Form.Item label='昵称' name='nickname' rules={[{ required: true }, { max: 20 }]}>
+        <Form.Item label="昵称" name="nickname" rules={[{ required: true }, { max: 20 }]}>
           <Input />
         </Form.Item>
-        <Form.Item label='电话' name='mobile' rules={[{ required: true }, { max: 20 }]}>
+        <Form.Item label="电话" name="mobile" rules={[{ required: true }, { max: 20 }]}>
           <Input />
         </Form.Item>
         <Form.Item
-          label='密码'
-          name='password'
+          label="密码"
+          name="password"
           rules={[{ required: !props.params }, { pattern: RegExp(Pattern.ADMIN_PASSWORD) }]}
         >
-          <Input.Password placeholder='留空不修改' />
+          <Input.Password placeholder="留空不修改" />
         </Form.Item>
-        <Form.Item label='角色' name='roles' rules={[{ required: true }]}>
-          <Select mode='multiple' optionLabelProp='label'>
+        <Form.Item label="角色" name="roles" rules={[{ required: true }]}>
+          <Select mode="multiple" optionLabelProp="label">
             {roles.map((item) => (
               <Select.Option
                 key={item.id}
@@ -146,10 +145,10 @@ const Editor: React.FC<APIAuthAdmin.Props> = (props) => {
             ))}
           </Select>
         </Form.Item>
-        <Form.Item label='启用' name='is_enable' rules={[{ required: true }]}>
+        <Form.Item label="启用" name="is_enable" rules={[{ required: true }]}>
           <Select>
             <Select.Option value={1}>是</Select.Option>
-            <Select.Option value={0}>否</Select.Option>
+            <Select.Option value={2}>否</Select.Option>
           </Select>
         </Form.Item>
       </Form>

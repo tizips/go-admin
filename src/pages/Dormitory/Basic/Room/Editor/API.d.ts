@@ -1,15 +1,13 @@
 declare namespace APIBasicRoom {
-
   type Props = {
     visible?: boolean;
     params?: APIBasicRooms.Data;
-    building?: number | string;
     buildings?: APIResponse.Online[];
     onCreate?: () => void;
     onUpdate?: () => void;
     onSave?: () => void;
     onCancel?: () => void;
-  }
+  };
 
   type Editor = {
     name?: string;
@@ -18,26 +16,26 @@ declare namespace APIBasicRoom {
     order?: number;
     is_furnish?: number;
     is_enable?: number;
-  }
+    is_public?: number;
+  };
 
   type Former = {
     name?: string;
-    building?: number;
-    floor?: number;
+    positions?: number[];
     type?: number;
     order?: number;
     is_furnish?: number;
     is_enable?: number;
-  }
+    is_public?: number;
+  };
 
   type Loading = {
     confirmed?: boolean;
     floor?: boolean;
     type?: boolean;
-  }
+  };
 
   type Filter = {
     building?: number;
-  }
-
+  };
 }

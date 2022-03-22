@@ -62,4 +62,39 @@ export default [
       },
     ],
   },
+  {
+    name: '资源',
+    icon: 'AccountBookOutlined',
+    path: '/dormitory/asset',
+    routes: [
+      {
+        name: '类型',
+        path: '/dormitory/asset/category',
+        access: 'routes',
+        permission: 'dormitory.asset.category.list',
+        component: './Dormitory/Asset/Category/List',
+      },
+      {
+        name: '设备',
+        path: '/dormitory/asset/device',
+        access: 'routes',
+        permission: 'dormitory.asset.device.paginate',
+        component: './Dormitory/Asset/Device/Paginate',
+      },
+      {
+        name: '打包',
+        path: '/dormitory/asset/package',
+        access: 'routes',
+        permission: 'dormitory.asset.package.paginate',
+        component: './Dormitory/Asset/Package/Paginate',
+      },
+      {
+        name: '发放',
+        path: '/dormitory/asset/grant',
+        access: 'routes',
+        permission: 'dormitory.asset.grant.paginate',
+        component: './Dormitory/Asset/Grant/Paginate',
+      },
+    ],
+  },
 ];

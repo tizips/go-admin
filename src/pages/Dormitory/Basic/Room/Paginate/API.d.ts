@@ -1,5 +1,4 @@
 declare namespace APIBasicRooms {
-
   type Data = {
     id?: number;
     name?: string;
@@ -10,30 +9,27 @@ declare namespace APIBasicRooms {
     order?: number;
     is_furnish?: number;
     is_enable?: number;
+    is_public?: number;
     created_at?: string | moment.Moment;
     loading_deleted?: boolean;
     loading_enable?: boolean;
     loading_furnish?: boolean;
-  }
+  };
 
   type Visible = {
     editor?: boolean;
-  }
+  };
 
   type Search = {
     page?: number;
+    is_public?: number;
     building?: number;
     floor?: number;
     room?: string;
-  }
-
-  type Loading = {
-    floor?: boolean;
-  }
+  };
 
   type Furnish = {
     id?: number;
     is_furnish?: number;
-  }
-
+  };
 }

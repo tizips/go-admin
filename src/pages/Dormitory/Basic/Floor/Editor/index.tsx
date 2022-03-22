@@ -4,11 +4,11 @@ import { doCreate, doUpdate } from './service';
 import Constants from '@/utils/Constants';
 
 const Editor: React.FC<APIBasicFloor.Props> = (props) => {
-
   const init: APIBasicFloor.Former = {
     name: '',
     order: 50,
     is_enable: 1,
+    is_public: 2,
   };
 
   const [former] = Form.useForm();
@@ -51,6 +51,7 @@ const Editor: React.FC<APIBasicFloor.Props> = (props) => {
       building: values.building,
       order: values.order,
       is_enable: values.is_enable,
+      is_public: values.is_public,
     };
 
     if (props.params) toUpdate(params);
@@ -58,7 +59,6 @@ const Editor: React.FC<APIBasicFloor.Props> = (props) => {
   };
 
   const toInit = () => {
-
     const data = init;
 
     if (typeof props.building == 'string') data.building = parseInt(props.building, 10);
@@ -78,32 +78,48 @@ const Editor: React.FC<APIBasicFloor.Props> = (props) => {
   }, [props.visible]);
 
   return (
-    <Modal title={props.params ? '修改' : '创建'} visible={props.visible} closable={false}
-           centered onOk={() => former.submit()}
-           maskClosable={false} onCancel={props.onCancel}
-           confirmLoading={loading.confirmed}>
+    <Modal
+      title={props.params ? '修改' : '创建'}
+      visible={props.visible}
+      closable={false}
+      centered
+      onOk={() => former.submit()}
+      maskClosable={false}
+      onCancel={props.onCancel}
+      confirmLoading={loading.confirmed}
+    >
       <Form form={former} initialValues={init} onFinish={onSubmit}>
-        <Form.Item label='名称' name='name' rules={[{ required: true }, { max: 20 }]}>
+        <Form.Item label="名称" name="name" rules={[{ required: true }, { max: 20 }]}>
           <Input />
         </Form.Item>
-        <Form.Item label='楼栋' name='building' rules={[{ required: true }]}>
+        <Form.Item label="楼栋" name="building" rules={[{ required: true }]}>
           <Select>
-            {
-              props.buildings?.map(item => (
-                <Select.Option key={item.id} value={item.id}>{item.name}</Select.Option>
-              ))
-            }
+            {props.buildings?.map((item) => (
+              <Select.Option key={item.id} value={item.id}>
+                {item.name}
+              </Select.Option>
+            ))}
           </Select>
         </Form.Item>
-        <Form.Item label='排序' name='order' rules={[{ required: true }, { type: 'number' }]}>
+        <Form.Item label="排序" name="order" rules={[{ required: true }, { type: 'number' }]}>
           <Slider min={1} max={99} />
         </Form.Item>
-        <Form.Item label='启用' name='is_enable' rules={[{ required: true }]}>
+        <Form.Item label="启用" name="is_enable" rules={[{ required: true }]}>
           <Select>
             <Select.Option value={1}>是</Select.Option>
-            <Select.Option value={0}>否</Select.Option>
+            <Select.Option value={2}>否</Select.Option>
           </Select>
         </Form.Item>
+        {!props.params ? (
+          <Form.Item label="公共" name="is_public" rules={[{ required: true }]}>
+            <Select>
+              <Select.Option value={1}>公共区域</Select.Option>
+              <Select.Option value={2}>非公共区域</Select.Option>
+            </Select>
+          </Form.Item>
+        ) : (
+          <></>
+        )}
       </Form>
     </Modal>
   );
