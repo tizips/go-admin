@@ -10,9 +10,9 @@ import bgImage from '@/static/img/background-login.jpg';
 
 import styles from './index.less';
 
-const initBasicFormer: APILogin.Login = {};
-
 const Login: React.FC = () => {
+  const initBasicFormer: APILogin.Login = {};
+
   const { initialState, setInitialState } = useModel('@@initialState');
   const [errors, setErrors] = useState('');
   const [loading, setLoading] = useState(false);
@@ -42,11 +42,8 @@ const Login: React.FC = () => {
           if (!history) return;
 
           const { query } = history.location;
-          const { redirect } = query as {
-            redirect: string;
-          };
+          const { redirect } = query as { redirect: string };
           history.push(redirect || '/');
-          return;
         }
       })
       .finally(() => setLoading(false));
@@ -54,18 +51,18 @@ const Login: React.FC = () => {
 
   return (
     <div className={styles.container} style={{ background: `url(${bgImage}) no-repeat 50%` }}>
-      <Row justify='center'>
+      <Row justify="center">
         <Col md={18} sm={16} xs={20} className={styles.loginBox}>
           <Row className={styles.loginContent}>
             <Col sm={0} md={0} lg={14} className={styles.leftLogin}>
-              <img src={leftImage} className={styles.leftImage} alt='' width='100%' />
+              <img src={leftImage} className={styles.leftImage} alt="" width="100%" />
             </Col>
             <Col lg={10} md={24} sm={24} className={styles.rightLogin}>
               <Row>
                 <Col xs={24}>
                   <h2 className={styles.title}>登录</h2>
                   {errors ? (
-                    <Alert className={styles.error} type='error' message={errors} showIcon />
+                    <Alert className={styles.error} type="error" message={errors} showIcon />
                   ) : (
                     <p className={styles.summary}>一站式服务</p>
                   )}
@@ -73,7 +70,7 @@ const Login: React.FC = () => {
                 <Col xs={24}>
                   <Form initialValues={initBasicFormer} onFinish={onSubmit} labelCol={{ span: 0 }}>
                     <Form.Item
-                      name='username'
+                      name="username"
                       validateFirst
                       rules={[
                         { required: true, message: '请输入您的用户名！' },
@@ -83,10 +80,10 @@ const Login: React.FC = () => {
                         },
                       ]}
                     >
-                      <Input prefix={<UserOutlined />} placeholder='Username' />
+                      <Input prefix={<UserOutlined />} placeholder="Username" />
                     </Form.Item>
                     <Form.Item
-                      name='password'
+                      name="password"
                       validateFirst
                       rules={[
                         { required: true, message: '请输入您的登录密码！' },
@@ -96,9 +93,9 @@ const Login: React.FC = () => {
                         },
                       ]}
                     >
-                      <Input.Password prefix={<LockOutlined />} placeholder='Password' />
+                      <Input.Password prefix={<LockOutlined />} placeholder="Password" />
                     </Form.Item>
-                    <Button type='primary' htmlType='submit' block loading={loading}>
+                    <Button type="primary" htmlType="submit" block loading={loading}>
                       立即登录
                     </Button>
                   </Form>

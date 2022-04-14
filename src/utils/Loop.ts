@@ -1,6 +1,6 @@
 const ById = (
   items: any[],
-  id?: number,
+  id?: number | string,
   callback?: (item: any, index: number, items: any[]) => any,
   object?: string,
 ) => {

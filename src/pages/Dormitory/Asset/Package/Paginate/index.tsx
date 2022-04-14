@@ -3,14 +3,12 @@ import { Button, Card, Col, Input, notification, Popconfirm, Row, Table, Tag, To
 import Constants from '@/utils/Constants';
 import moment from 'moment';
 import { FormOutlined, RedoOutlined } from '@ant-design/icons';
-import { useModel } from '@@/plugin-model/useModel';
 import Create from '@/pages/Dormitory/Asset/Package/Create';
 import { doDelete, doPaginate } from './service';
 import Loop from '@/utils/Loop';
+import Authorize from '@/components/Basic/Authorize';
 
 const Paginate: React.FC = () => {
-  const { initialState } = useModel('@@initialState');
-
   const [editor, setEditor] = useState<APIAssetPackages.Data | undefined>();
   const [search, setSearch] = useState<APIAssetPackages.Search>({});
   const [loadingPaginate, setLoadingPaginate] = useState(false);
@@ -37,7 +35,7 @@ const Paginate: React.FC = () => {
   const onDelete = (record: APIAssetPackages.Data) => {
     if (data) {
       const temp: APIAssetPackages.Data[] = [...data];
-      Loop.ById(temp, record.id, (item: APIAssetPackages.Data) => (item.loading_deleted = true));
+      Loop.ById(temp, record.id, (item) => (item.loading_deleted = true));
       setData(temp);
     }
 
@@ -53,11 +51,7 @@ const Paginate: React.FC = () => {
       .finally(() => {
         if (data) {
           const temp: APIAssetPackages.Data[] = [...data];
-          Loop.ById(
-            temp,
-            record.id,
-            (item: APIAssetPackages.Data) => (item.loading_deleted = false),
-          );
+          Loop.ById(temp, record.id, (item) => (item.loading_deleted = false));
           setData(temp);
         }
       });
@@ -110,16 +104,13 @@ const Paginate: React.FC = () => {
                 />
               </Tooltip>
             </Col>
-            {initialState?.permissions &&
-            initialState?.permissions?.indexOf('dormitory.asset.package.create') >= 0 ? (
+            <Authorize permission="dormitory.asset.package.create">
               <Col>
                 <Tooltip title="创建">
                   <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
                 </Tooltip>
               </Col>
-            ) : (
-              <></>
-            )}
+            </Authorize>
           </Row>
         }
       >
@@ -138,15 +129,13 @@ const Paginate: React.FC = () => {
           <Table.Column title="名称" dataIndex="name" />
           <Table.Column
             title="设备"
-            render={(record: APIAssetPackages.Data) => (
-              <>
-                {record.devices?.map((item) => (
-                  <Tag key={item.id} color="green">
-                    {item.name} * {item.number}
-                  </Tag>
-                ))}
-              </>
-            )}
+            render={(record: APIAssetPackages.Data) =>
+              record.devices?.map((item) => (
+                <Tag key={item.id} color="green">
+                  {item.name} * {item.number}
+                </Tag>
+              ))
+            }
           />
           <Table.Column
             title="创建时间"
@@ -159,16 +148,12 @@ const Paginate: React.FC = () => {
             width={100}
             render={(record: APIAssetPackages.Data) => (
               <>
-                {initialState?.permissions &&
-                initialState?.permissions?.indexOf('dormitory.asset.package.update') >= 0 ? (
+                <Authorize permission="dormitory.asset.package.update">
                   <Button type="link" onClick={() => onUpdate(record)}>
                     修改
                   </Button>
-                ) : (
-                  <></>
-                )}
-                {initialState?.permissions &&
-                initialState?.permissions?.indexOf('dormitory.asset.package.delete') >= 0 ? (
+                </Authorize>
+                <Authorize permission="dormitory.asset.package.delete">
                   <Popconfirm
                     title="确定要删除该数据?"
                     placement="leftTop"
@@ -178,18 +163,14 @@ const Paginate: React.FC = () => {
                       删除
                     </Button>
                   </Popconfirm>
-                ) : (
-                  <></>
-                )}
+                </Authorize>
               </>
             )}
           />
         </Table>
       </Card>
-      {visible.create != undefined ? (
+      {visible.create != undefined && (
         <Create visible={visible.create} params={editor} onCreate={onSuccess} onCancel={onCancel} />
-      ) : (
-        <></>
       )}
     </>
   );

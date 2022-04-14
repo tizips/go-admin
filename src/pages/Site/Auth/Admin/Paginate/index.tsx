@@ -18,6 +18,8 @@ import { useModel } from '@@/plugin-model/useModel';
 import Editor from '@/pages/Site/Auth/Admin/Editor';
 import { doDelete, doEnable, doPaginate } from './service';
 import Loop from '@/utils/Loop';
+import Authorize from '@/components/Basic/Authorize';
+import Enable from '@/components/Basic/Enable';
 
 const Paginate: React.FC = () => {
   const { initialState } = useModel('@@initialState');
@@ -39,9 +41,7 @@ const Paginate: React.FC = () => {
             page: response.data.page,
             total: response.data.total,
           });
-          if (response.data.data)
-            response.data.data.forEach((item) => (item.created_at = moment(item.created_at)));
-          setData(response.data.data);
+          setData(response.data.data || []);
         }
       })
       .finally(() => setLoadingPaginate(false));
@@ -62,15 +62,11 @@ const Paginate: React.FC = () => {
           notification.error({ message: response.message });
         } else {
           notification.success({
-            message: `账号${enable.is_enable === 1 ? '启用' : '禁用'}成功！`,
+            message: `${enable.is_enable === 1 ? '启用' : '禁用'}成功！`,
           });
           if (data) {
             const temp = [...data];
-            Loop.ById(
-              temp,
-              record.id,
-              (item: APIAuthAdmins.Data) => (item.is_enable = enable.is_enable),
-            );
+            Loop.ById(temp, record.id, (item) => (item.is_enable = enable.is_enable));
             setData(temp);
           }
         }
@@ -78,31 +74,34 @@ const Paginate: React.FC = () => {
       .finally(() => {
         if (data) {
           const temp = [...data];
-          Loop.ById(temp, record.id, (item: APIAuthAdmins.Data) => (item.loading_enable = false));
+          Loop.ById(temp, record.id, (item) => (item.loading_enable = false));
           setData(temp);
         }
       });
   };
 
   const onDelete = (record: APIAuthAdmins.Data) => {
-    // @ts-ignore
-    let temp: APIAuthAdmins.Data[] = [...data];
-    Loop.ById(temp, record.id, (item: APIAuthAdmins.Data) => (item.loading_deleted = true));
-    setData(temp);
+    if (data) {
+      const temp = [...data];
+      Loop.ById(temp, record.id, (item: APIAuthAdmins.Data) => (item.loading_deleted = true));
+      setData(temp);
+    }
 
     doDelete(record.id)
       .then((response: APIResponse.Response<any>) => {
         if (response.code !== Constants.Success) {
           notification.error({ message: response.message });
         } else {
-          notification.success({ message: '账号删除成功！' });
+          notification.success({ message: '删除成功！' });
           toPaginate();
         }
       })
       .finally(() => {
-        temp = [...data];
-        Loop.ById(temp, record.id, (item: APIAuthAdmins.Data) => (item.loading_deleted = false));
-        setData(temp);
+        if (data) {
+          const temp = [...data];
+          Loop.ById(temp, record.id, (item) => (item.loading_deleted = false));
+          setData(temp);
+        }
       });
   };
 
@@ -145,16 +144,13 @@ const Paginate: React.FC = () => {
                 />
               </Tooltip>
             </Col>
-            {initialState?.permissions &&
-            initialState?.permissions?.indexOf('site.auth.admin.create') >= 0 ? (
+            <Authorize permission="site.auth.admin.create">
               <Col>
                 <Tooltip title="创建">
                   <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
                 </Tooltip>
               </Col>
-            ) : (
-              <></>
-            )}
+            </Authorize>
           </Row>
         }
       >
@@ -190,22 +186,23 @@ const Paginate: React.FC = () => {
             title="启用"
             align="center"
             render={(record: APIAuthAdmins.Data) => (
-              <Switch
-                size="small"
-                checked={record.is_enable === 1}
-                onClick={() => onEnable(record)}
-                disabled={
-                  initialState?.permissions &&
-                  initialState?.permissions?.indexOf('site.auth.admin.enable') < 0
-                }
-                loading={record.loading_enable}
-              />
+              <Authorize
+                permission="site.auth.admin.enable"
+                fallback={<Enable is_enable={record.is_enable} />}
+              >
+                <Switch
+                  size="small"
+                  checked={record.is_enable === 1}
+                  onClick={() => onEnable(record)}
+                  loading={record.loading_enable}
+                />
+              </Authorize>
             )}
           />
           <Table.Column
             title="创建时间"
             render={(record: APIAuthAdmins.Data) =>
-              moment.isMoment(record.created_at) && record.created_at.format('YYYY/MM/DD HH:mm')
+              record.created_at && moment(record.created_at).format('YYYY/MM/DD')
             }
           />
           <Table.Column
@@ -213,16 +210,12 @@ const Paginate: React.FC = () => {
             width={100}
             render={(record: APIAuthAdmins.Data) => (
               <>
-                {initialState?.permissions &&
-                initialState?.permissions?.indexOf('site.auth.admin.update') >= 0 ? (
+                <Authorize permission="site.auth.admin.update">
                   <Button type="link" onClick={() => onUpdate(record)}>
                     编辑
                   </Button>
-                ) : (
-                  <></>
-                )}
-                {initialState?.permissions &&
-                initialState?.permissions?.indexOf('site.auth.admin.delete') >= 0 ? (
+                </Authorize>
+                <Authorize permission="site.auth.admin.delete">
                   <Popconfirm
                     title="确定要删除该数据?"
                     placement="leftTop"
@@ -232,18 +225,14 @@ const Paginate: React.FC = () => {
                       删除
                     </Button>
                   </Popconfirm>
-                ) : (
-                  <></>
-                )}
+                </Authorize>
               </>
             )}
           />
         </Table>
       </Card>
-      {visible.editor != undefined ? (
+      {visible.editor != undefined && (
         <Editor visible={visible.editor} params={editor} onSave={onSuccess} onCancel={onCancel} />
-      ) : (
-        <></>
       )}
     </>
   );

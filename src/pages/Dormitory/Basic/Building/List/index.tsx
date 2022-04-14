@@ -18,32 +18,30 @@ import { useModel } from '@@/plugin-model/useModel';
 import Editor from '@/pages/Dormitory/Basic/Building/Editor';
 import { doDelete, doEnable, doList } from './service';
 import Loop from '@/utils/Loop';
+import Authorize from '@/components/Basic/Authorize';
+import Enable from '@/components/Basic/Enable';
 
 const List: React.FC = () => {
   const { initialState } = useModel('@@initialState');
 
   const [editor, setEditor] = useState<APIBasicBuildings.Data | undefined>();
-  const [loadingPaginate, setLoadingPaginate] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [visible, setVisible] = useState<APIBasicBuildings.Visible>({});
   const [data, setData] = useState<APIBasicBuildings.Data[]>();
 
-  const toPaginate = () => {
-    setLoadingPaginate(true);
+  const toList = () => {
+    setLoading(true);
     doList()
       .then((response: APIResponse.Response<APIBasicBuildings.Data[]>) => {
-        if (response.code === Constants.Success) {
-          if (response.data)
-            response.data.forEach((item) => (item.created_at = moment(item.created_at)));
-          setData(response.data || []);
-        }
+        if (response.code === Constants.Success) setData(response.data || []);
       })
-      .finally(() => setLoadingPaginate(false));
+      .finally(() => setLoading(false));
   };
 
   const onDelete = (record: APIBasicBuildings.Data) => {
     if (data) {
       const temp: APIBasicBuildings.Data[] = [...data];
-      Loop.ById(temp, record.id, (item: APIBasicBuildings.Data) => (item.loading_deleted = true));
+      Loop.ById(temp, record.id, (item) => (item.loading_deleted = true));
       setData(temp);
     }
 
@@ -53,17 +51,13 @@ const List: React.FC = () => {
           notification.error({ message: response.message });
         } else {
           notification.success({ message: '楼栋删除成功！' });
-          toPaginate();
+          toList();
         }
       })
       .finally(() => {
         if (data) {
           const temp: APIBasicBuildings.Data[] = [...data];
-          Loop.ById(
-            temp,
-            record.id,
-            (item: APIBasicBuildings.Data) => (item.loading_deleted = false),
-          );
+          Loop.ById(temp, record.id, (item) => (item.loading_deleted = false));
           setData(temp);
         }
       });
@@ -81,7 +75,7 @@ const List: React.FC = () => {
 
   const onSuccess = () => {
     setVisible({ ...visible, editor: false });
-    toPaginate();
+    toList();
   };
 
   const onCancel = () => {
@@ -91,7 +85,7 @@ const List: React.FC = () => {
   const onEnable = (record: APIBasicBuildings.Data) => {
     if (data) {
       const temp: APIBasicBuildings.Data[] = [...data];
-      Loop.ById(temp, record.id, (item: APIBasicBuildings.Data) => (item.loading_enable = true));
+      Loop.ById(temp, record.id, (item) => (item.loading_enable = true));
       setData(temp);
     }
 
@@ -103,15 +97,11 @@ const List: React.FC = () => {
           notification.error({ message: response.message });
         } else {
           notification.success({
-            message: `楼栋${enable.is_enable === 1 ? '启用' : '禁用'}成功！`,
+            message: `${enable.is_enable === 1 ? '启用' : '禁用'}成功！`,
           });
           if (data) {
             const temp = [...data];
-            Loop.ById(
-              temp,
-              record.id,
-              (item: APIBasicBuildings.Data) => (item.is_enable = enable.is_enable),
-            );
+            Loop.ById(temp, record.id, (item) => (item.is_enable = enable.is_enable));
             setData(temp);
           }
         }
@@ -119,18 +109,14 @@ const List: React.FC = () => {
       .finally(() => {
         if (data) {
           const temp = [...data];
-          Loop.ById(
-            temp,
-            record.id,
-            (item: APIBasicBuildings.Data) => (item.loading_enable = false),
-          );
+          Loop.ById(temp, record.id, (item) => (item.loading_enable = false));
           setData(temp);
         }
       });
   };
 
   useEffect(() => {
-    toPaginate();
+    toList();
   }, []);
 
   return (
@@ -141,28 +127,20 @@ const List: React.FC = () => {
           <Row gutter={10}>
             <Col>
               <Tooltip title="刷新">
-                <Button
-                  type="primary"
-                  icon={<RedoOutlined />}
-                  onClick={toPaginate}
-                  loading={loadingPaginate}
-                />
+                <Button type="primary" icon={<RedoOutlined />} onClick={toList} loading={loading} />
               </Tooltip>
             </Col>
-            {initialState?.permissions &&
-            initialState?.permissions?.indexOf('dormitory.basic.building.create') >= 0 ? (
+            <Authorize permission="dormitory.basic.building.create">
               <Col>
                 <Tooltip title="创建">
                   <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
                 </Tooltip>
               </Col>
-            ) : (
-              <></>
-            )}
+            </Authorize>
           </Row>
         }
       >
-        <Table dataSource={data} rowKey="id" loading={loadingPaginate} pagination={false}>
+        <Table dataSource={data} rowKey="id" loading={loading} pagination={false}>
           <Table.Column title="名称" dataIndex="name" />
           <Table.Column
             title="公共区域"
@@ -184,22 +162,23 @@ const List: React.FC = () => {
             title="启用"
             align="center"
             render={(record: APIBasicBuildings.Data) => (
-              <Switch
-                size="small"
-                checked={record.is_enable === 1}
-                onClick={() => onEnable(record)}
-                disabled={
-                  initialState?.permissions &&
-                  initialState?.permissions?.indexOf('dormitory.basic.building.enable') < 0
-                }
-                loading={record.loading_enable}
-              />
+              <Authorize
+                permission="dormitory.basic.building.enable"
+                fallback={<Enable is_enable={record.is_enable} />}
+              >
+                <Switch
+                  size="small"
+                  checked={record.is_enable === 1}
+                  onClick={() => onEnable(record)}
+                  loading={record.loading_enable}
+                />
+              </Authorize>
             )}
           />
           <Table.Column
             title="创建时间"
             render={(record: APIBasicBuildings.Data) =>
-              moment.isMoment(record.created_at) && record.created_at.format('YYYY/MM/DD')
+              record.created_at && moment(record.created_at).format('YYYY/MM/DD')
             }
           />
           <Table.Column
@@ -207,16 +186,12 @@ const List: React.FC = () => {
             width={100}
             render={(record: APIBasicBuildings.Data) => (
               <>
-                {initialState?.permissions &&
-                initialState?.permissions?.indexOf('dormitory.basic.building.update') >= 0 ? (
+                <Authorize permission="dormitory.basic.building.update">
                   <Button type="link" onClick={() => onUpdate(record)}>
                     编辑
                   </Button>
-                ) : (
-                  <></>
-                )}
-                {initialState?.permissions &&
-                initialState?.permissions?.indexOf('dormitory.basic.building.delete') >= 0 ? (
+                </Authorize>
+                <Authorize permission="dormitory.basic.building.delete">
                   <Popconfirm
                     title="确定要删除该数据?"
                     placement="leftTop"
@@ -226,18 +201,14 @@ const List: React.FC = () => {
                       删除
                     </Button>
                   </Popconfirm>
-                ) : (
-                  <></>
-                )}
+                </Authorize>
               </>
             )}
           />
         </Table>
       </Card>
-      {visible.editor != undefined ? (
+      {visible.editor != undefined && (
         <Editor visible={visible.editor} params={editor} onSave={onSuccess} onCancel={onCancel} />
-      ) : (
-        <></>
       )}
     </>
   );

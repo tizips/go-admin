@@ -1,5 +1,4 @@
 declare namespace APIAuthAdmins {
-
   type Data = {
     id?: number;
     username?: string;
@@ -7,17 +6,16 @@ declare namespace APIAuthAdmins {
     mobile?: string;
     is_enable?: number;
     roles?: { id: number; name: string }[];
-    created_at?: string | moment.Moment;
+    created_at?: string;
     loading_deleted?: boolean;
     loading_enable?: boolean;
-  }
+  };
 
   type Visible = {
     editor?: boolean;
-  }
+  };
 
   type Search = {
     page?: number;
-  }
-
+  };
 }

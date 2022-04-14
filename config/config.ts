@@ -23,7 +23,8 @@ export default defineConfig({
     default: 'zh-CN',
   },
   dynamicImport: {
-    loading: '@ant-design/pro-layout/es/PageLoading',
+    // loading: '@ant-design/pro-layout/es/PageLoading',
+    loading: '@/components/Basic/Loading',
   },
   targets: {
     ie: 11,

@@ -18,6 +18,8 @@ import { useModel } from '@@/plugin-model/useModel';
 import Editor from '@/pages/Dormitory/Basic/Type/Editor';
 import { doDelete, doEnable, doList } from './service';
 import Loop from '@/utils/Loop';
+import Authorize from '@/components/Basic/Authorize';
+import Enable from '@/components/Basic/Enable';
 
 const List: React.FC = () => {
   const { initialState } = useModel('@@initialState');
@@ -31,11 +33,7 @@ const List: React.FC = () => {
     setLoadingPaginate(true);
     doList()
       .then((response: APIResponse.Response<APIBasicTypes.Data[]>) => {
-        if (response.code === Constants.Success) {
-          if (response.data)
-            response.data.forEach((item) => (item.created_at = moment(item.created_at)));
-          setData(response.data || []);
-        }
+        if (response.code === Constants.Success) setData(response.data || []);
       })
       .finally(() => setLoadingPaginate(false));
   };
@@ -43,7 +41,7 @@ const List: React.FC = () => {
   const onDelete = (record: APIBasicTypes.Data) => {
     if (data) {
       const temp: APIBasicTypes.Data[] = [...data];
-      Loop.ById(temp, record.id, (item: APIBasicTypes.Data) => (item.loading_deleted = true));
+      Loop.ById(temp, record.id, (item) => (item.loading_deleted = true));
       setData(temp);
     }
 
@@ -52,14 +50,14 @@ const List: React.FC = () => {
         if (response.code !== Constants.Success) {
           notification.error({ message: response.message });
         } else {
-          notification.success({ message: '房型删除成功！' });
+          notification.success({ message: '删除成功！' });
           toPaginate();
         }
       })
       .finally(() => {
         if (data) {
           const temp: APIBasicTypes.Data[] = [...data];
-          Loop.ById(temp, record.id, (item: APIBasicTypes.Data) => (item.loading_deleted = false));
+          Loop.ById(temp, record.id, (item) => (item.loading_deleted = false));
           setData(temp);
         }
       });
@@ -87,7 +85,7 @@ const List: React.FC = () => {
   const onEnable = (record: APIBasicTypes.Data) => {
     if (data) {
       const temp: APIBasicTypes.Data[] = [...data];
-      Loop.ById(temp, record.id, (item: APIBasicTypes.Data) => (item.loading_enable = true));
+      Loop.ById(temp, record.id, (item) => (item.loading_enable = true));
       setData(temp);
     }
 
@@ -99,15 +97,11 @@ const List: React.FC = () => {
           notification.error({ message: response.message });
         } else {
           notification.success({
-            message: `房型${enable.is_enable === 1 ? '启用' : '禁用'}成功！`,
+            message: `${enable.is_enable === 1 ? '启用' : '禁用'}成功！`,
           });
           if (data) {
             const temp = [...data];
-            Loop.ById(
-              temp,
-              record.id,
-              (item: APIBasicTypes.Data) => (item.is_enable = enable.is_enable),
-            );
+            Loop.ById(temp, record.id, (item) => (item.is_enable = enable.is_enable));
             setData(temp);
           }
         }
@@ -115,7 +109,7 @@ const List: React.FC = () => {
       .finally(() => {
         if (data) {
           const temp = [...data];
-          Loop.ById(temp, record.id, (item: APIBasicTypes.Data) => (item.loading_enable = false));
+          Loop.ById(temp, record.id, (item) => (item.loading_enable = false));
           setData(temp);
         }
       });
@@ -141,16 +135,13 @@ const List: React.FC = () => {
                 />
               </Tooltip>
             </Col>
-            {initialState?.permissions &&
-            initialState?.permissions?.indexOf('dormitory.basic.type.create') >= 0 ? (
+            <Authorize permission="dormitory.basic.type.create">
               <Col>
                 <Tooltip title="创建">
                   <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
                 </Tooltip>
               </Col>
-            ) : (
-              <></>
-            )}
+            </Authorize>
           </Row>
         }
       >
@@ -160,7 +151,7 @@ const List: React.FC = () => {
             title="配置"
             render={(record: APIBasicTypes.Data) =>
               record.beds ? (
-                record.beds?.map((item, index) => (
+                record.beds.map((item, index) => (
                   <Tag key={index} color={item.is_public === 1 ? '#87d068' : '#f50'}>
                     {item.name}
                   </Tag>
@@ -180,22 +171,23 @@ const List: React.FC = () => {
             title="启用"
             align="center"
             render={(record: APIBasicTypes.Data) => (
-              <Switch
-                size="small"
-                checked={record.is_enable === 1}
-                onClick={() => onEnable(record)}
-                disabled={
-                  initialState?.permissions &&
-                  initialState?.permissions?.indexOf('dormitory.basic.type.enable') < 0
-                }
-                loading={record.loading_enable}
-              />
+              <Authorize
+                permission="dormitory.basic.type.enable"
+                fallback={<Enable is_enable={record.is_enable} />}
+              >
+                <Switch
+                  size="small"
+                  checked={record.is_enable === 1}
+                  onClick={() => onEnable(record)}
+                  loading={record.loading_enable}
+                />
+              </Authorize>
             )}
           />
           <Table.Column
             title="创建时间"
             render={(record: APIBasicTypes.Data) =>
-              moment.isMoment(record.created_at) && record.created_at.format('YYYY/MM/DD')
+              record.created_at && moment(record.created_at).format('YYYY/MM/DD')
             }
           />
           <Table.Column
@@ -203,16 +195,12 @@ const List: React.FC = () => {
             width={100}
             render={(record: APIBasicTypes.Data) => (
               <>
-                {initialState?.permissions &&
-                initialState?.permissions?.indexOf('dormitory.basic.type.update') >= 0 ? (
+                <Authorize permission="dormitory.basic.type.update">
                   <Button type="link" onClick={() => onUpdate(record)}>
                     编辑
                   </Button>
-                ) : (
-                  <></>
-                )}
-                {initialState?.permissions &&
-                initialState?.permissions?.indexOf('dormitory.basic.type.delete') >= 0 ? (
+                </Authorize>
+                <Authorize permission="dormitory.basic.type.delete">
                   <Popconfirm
                     title="确定要删除该数据?"
                     placement="leftTop"
@@ -222,18 +210,14 @@ const List: React.FC = () => {
                       删除
                     </Button>
                   </Popconfirm>
-                ) : (
-                  <></>
-                )}
+                </Authorize>
               </>
             )}
           />
         </Table>
       </Card>
-      {visible.editor != undefined ? (
+      {visible.editor != undefined && (
         <Editor visible={visible.editor} params={editor} onSave={onSuccess} onCancel={onCancel} />
-      ) : (
-        <></>
       )}
     </>
   );

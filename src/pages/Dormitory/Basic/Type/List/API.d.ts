@@ -5,7 +5,7 @@ declare namespace APIBasicTypes {
     beds?: { name: ?string; is_public?: number }[];
     order?: number;
     is_enable?: number;
-    created_at?: string | moment.Moment;
+    created_at?: string;
     loading_deleted?: boolean;
     loading_enable?: boolean;
   };

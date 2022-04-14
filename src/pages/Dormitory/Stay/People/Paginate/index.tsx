@@ -17,15 +17,13 @@ import {
 import Constants from '@/utils/Constants';
 import moment from 'moment';
 import { FormOutlined, RedoOutlined, VerticalLeftOutlined } from '@ant-design/icons';
-import { useModel } from '@@/plugin-model/useModel';
 import Create from '@/pages/Dormitory/Stay/People/Create';
 import { doDelete, doPaginate } from './service';
 import { doBuildingByOnline, doFloorByOnline } from '@/services/dormitory';
 import Loop from '@/utils/Loop';
+import Authorize from '@/components/Basic/Authorize';
 
 const Paginate: React.FC = () => {
-  const { initialState } = useModel('@@initialState');
-
   const [filter, setFilter] = useState<APIStayPeoples.Filter>({});
   const [search, setSearch] = useState<APIStayPeoples.Search>({ status: 'live' });
   const [loadingPaginate, setLoadingPaginate] = useState(false);
@@ -63,7 +61,7 @@ const Paginate: React.FC = () => {
           },
           'building',
         );
-        if (data !== positions) setPositions(temp);
+        if (temp !== positions) setPositions(temp);
       },
     );
   };
@@ -90,7 +88,7 @@ const Paginate: React.FC = () => {
   const onDelete = (record: APIStayPeoples.Data) => {
     if (data) {
       const temp: APIStayPeoples.Data[] = [...data];
-      Loop.ById(temp, record.id, (item: APIStayPeoples.Data) => (item.loading_deleted = true));
+      Loop.ById(temp, record.id, (item) => (item.loading_deleted = true));
       setData(temp);
     }
 
@@ -99,14 +97,14 @@ const Paginate: React.FC = () => {
         if (response.code !== Constants.Success) {
           notification.error({ message: response.message });
         } else {
-          notification.success({ message: '房间删除成功！' });
+          notification.success({ message: '删除成功！' });
           toPaginate();
         }
       })
       .finally(() => {
         if (data) {
           const temp: APIStayPeoples.Data[] = [...data];
-          Loop.ById(temp, record.id, (item: APIStayPeoples.Data) => (item.loading_deleted = false));
+          Loop.ById(temp, record.id, (item) => (item.loading_deleted = false));
           setData(temp);
         }
       });
@@ -202,45 +200,35 @@ const Paginate: React.FC = () => {
         <Descriptions.Item label="预离时间">
           {record.end ? moment(record.end).format('YYYY/MM/DD') : '-'}
         </Descriptions.Item>
-        {record.manager ||
-        record.titles ||
-        (record.departments && record.departments.length > 0) ? (
+        {(record.manager ||
+          record.titles ||
+          (record.departments && record.departments.length > 0)) && (
           <>
             <Descriptions.Item label="直系领导">
               {record.manager ? `${record.manager.name}「${record.manager.mobile}」` : '-'}
             </Descriptions.Item>
             <Descriptions.Item label="职位名称">{record.titles || '-'}</Descriptions.Item>
             <Descriptions.Item label="所属部门">
-              {record.departments && record.departments.length > 0 ? (
-                record.departments.map((item, idx) => (
-                  <Tag key={idx} color="green">
-                    {item}
-                  </Tag>
-                ))
-              ) : (
-                <>-</>
-              )}
+              {record.departments?.map((item, idx) => (
+                <Tag key={idx} color="green">
+                  {item}
+                </Tag>
+              ))}
             </Descriptions.Item>
           </>
-        ) : (
-          <></>
         )}
-        {record.certification ? (
+        {record.certification && (
           <>
             <Descriptions.Item label="证件号码">{record.certification?.no}</Descriptions.Item>
             <Descriptions.Item label="证件住址" span={2}>
               {record.certification?.address}
             </Descriptions.Item>
           </>
-        ) : (
-          <></>
         )}
-        {record.remark ? (
+        {record.remark && (
           <Descriptions.Item label="备注" span={3}>
             {record.remark}
           </Descriptions.Item>
-        ) : (
-          <></>
         )}
       </Descriptions>
     );
@@ -253,16 +241,6 @@ const Paginate: React.FC = () => {
         extra={
           <Row gutter={[10, 10]} justify="end">
             <Col>
-              <Select
-                placeholder="临时"
-                allowClear
-                onChange={(is_temp) => setSearch({ ...search, is_temp, page: undefined })}
-              >
-                <Select.Option value={1}>是</Select.Option>
-                <Select.Option value={2}>否</Select.Option>
-              </Select>
-            </Col>
-            <Col>
               <Cascader
                 options={positions}
                 loadData={onPositions}
@@ -271,6 +249,16 @@ const Paginate: React.FC = () => {
                 changeOnSelect
                 placeholder="位置选择"
               />
+            </Col>
+            <Col>
+              <Select
+                placeholder="临时"
+                allowClear
+                onChange={(is_temp) => setSearch({ ...search, is_temp, page: undefined })}
+              >
+                <Select.Option value={1}>是</Select.Option>
+                <Select.Option value={2}>否</Select.Option>
+              </Select>
             </Col>
             <Col>
               <Select
@@ -313,16 +301,13 @@ const Paginate: React.FC = () => {
                 />
               </Tooltip>
             </Col>
-            {initialState?.permissions &&
-            initialState?.permissions?.indexOf('dormitory.basic.bed.create') >= 0 ? (
+            <Authorize permission="dormitory.basic.bed.create">
               <Col>
                 <Tooltip title="创建">
                   <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
                 </Tooltip>
               </Col>
-            ) : (
-              <></>
-            )}
+            </Authorize>
           </Row>
         }
       >
@@ -367,8 +352,7 @@ const Paginate: React.FC = () => {
             width={100}
             render={(record: APIStayPeoples.Data) => (
               <>
-                {initialState?.permissions &&
-                initialState?.permissions?.indexOf('dormitory.live.live.leave') >= 0 ? (
+                <Authorize permission="dormitory.live.live.leave">
                   <Popconfirm
                     title="确定要删除该数据?"
                     placement="leftTop"
@@ -378,23 +362,19 @@ const Paginate: React.FC = () => {
                       删除
                     </Button>
                   </Popconfirm>
-                ) : (
-                  <></>
-                )}
+                </Authorize>
               </>
             )}
           />
         </Table>
       </Card>
-      {visible.create != undefined ? (
+      {visible.create != undefined && (
         <Create
           visible={visible.create}
           buildings={buildings}
           onCreate={onSuccess}
           onCancel={onCancel}
         />
-      ) : (
-        <></>
       )}
     </>
   );

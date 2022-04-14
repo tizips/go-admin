@@ -18,6 +18,8 @@ import { useModel } from '@@/plugin-model/useModel';
 import Editor from '@/pages/Dormitory/Asset/Category/Editor';
 import { doDelete, doEnable, doList } from './service';
 import Loop from '@/utils/Loop';
+import Authorize from '@/components/Basic/Authorize';
+import Enable from '@/components/Basic/Enable';
 
 const List: React.FC = () => {
   const { initialState } = useModel('@@initialState');
@@ -87,7 +89,7 @@ const List: React.FC = () => {
   const onEnable = (record: APIAssetCategories.Data) => {
     if (data) {
       const temp: APIAssetCategories.Data[] = [...data];
-      Loop.ById(temp, record.id, (item: APIAssetCategories.Data) => (item.loading_enable = true));
+      Loop.ById(temp, record.id, (item) => (item.loading_enable = true));
       setData(temp);
     }
 
@@ -103,11 +105,7 @@ const List: React.FC = () => {
           });
           if (data) {
             const temp = [...data];
-            Loop.ById(
-              temp,
-              record.id,
-              (item: APIAssetCategories.Data) => (item.is_enable = enable.is_enable),
-            );
+            Loop.ById(temp, record.id, (item) => (item.is_enable = enable.is_enable));
             setData(temp);
           }
         }
@@ -115,11 +113,7 @@ const List: React.FC = () => {
       .finally(() => {
         if (data) {
           const temp = [...data];
-          Loop.ById(
-            temp,
-            record.id,
-            (item: APIAssetCategories.Data) => (item.loading_enable = false),
-          );
+          Loop.ById(temp, record.id, (item) => (item.loading_enable = false));
           setData(temp);
         }
       });
@@ -145,16 +139,13 @@ const List: React.FC = () => {
                 />
               </Tooltip>
             </Col>
-            {initialState?.permissions &&
-            initialState?.permissions?.indexOf('dormitory.stay.category.create') >= 0 ? (
+            <Authorize permission="dormitory.asset.category.create">
               <Col>
                 <Tooltip title="创建">
                   <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
                 </Tooltip>
               </Col>
-            ) : (
-              <></>
-            )}
+            </Authorize>
           </Row>
         }
       >
@@ -170,16 +161,17 @@ const List: React.FC = () => {
             title="启用"
             align="center"
             render={(record: APIAssetCategories.Data) => (
-              <Switch
-                size="small"
-                checked={record.is_enable === 1}
-                onClick={() => onEnable(record)}
-                disabled={
-                  initialState?.permissions &&
-                  initialState?.permissions?.indexOf('dormitory.stay.category.enable') < 0
-                }
-                loading={record.loading_enable}
-              />
+              <Authorize
+                permission="dormitory.asset.category.enable"
+                fallback={<Enable is_enable={record.is_enable} />}
+              >
+                <Switch
+                  size="small"
+                  checked={record.is_enable === 1}
+                  onClick={() => onEnable(record)}
+                  loading={record.loading_enable}
+                />
+              </Authorize>
             )}
           />
           <Table.Column
@@ -193,16 +185,12 @@ const List: React.FC = () => {
             width={100}
             render={(record: APIAssetCategories.Data) => (
               <>
-                {initialState?.permissions &&
-                initialState?.permissions?.indexOf('dormitory.stay.category.update') >= 0 ? (
+                <Authorize permission="dormitory.asset.category.update">
                   <Button type="link" onClick={() => onUpdate(record)}>
                     编辑
                   </Button>
-                ) : (
-                  <></>
-                )}
-                {initialState?.permissions &&
-                initialState?.permissions?.indexOf('dormitory.stay.category.delete') >= 0 ? (
+                </Authorize>
+                <Authorize permission="dormitory.asset.category.delete">
                   <Popconfirm
                     title="确定要删除该数据?"
                     placement="leftTop"
@@ -212,18 +200,14 @@ const List: React.FC = () => {
                       删除
                     </Button>
                   </Popconfirm>
-                ) : (
-                  <></>
-                )}
+                </Authorize>
               </>
             )}
           />
         </Table>
       </Card>
-      {visible.editor != undefined ? (
+      {visible.editor != undefined && (
         <Editor visible={visible.editor} params={editor} onSave={onSuccess} onCancel={onCancel} />
-      ) : (
-        <></>
       )}
     </>
   );

@@ -3,14 +3,12 @@ import { Button, Card, Col, notification, Popconfirm, Row, Table, Tag, Tooltip }
 import Constants from '@/utils/Constants';
 import moment from 'moment';
 import { FormOutlined, RedoOutlined } from '@ant-design/icons';
-import { useModel } from '@@/plugin-model/useModel';
 import Create from '@/pages/Dormitory/Asset/Grant/Create';
 import { doPaginate, doRevoke } from './service';
 import Loop from '@/utils/Loop';
+import Authorize from '@/components/Basic/Authorize';
 
 const Paginate: React.FC = () => {
-  const { initialState } = useModel('@@initialState');
-
   const [editor, setEditor] = useState<APIAssetGrants.Data | undefined>();
   const [search, setSearch] = useState<APIAssetGrants.Search>({});
   const [loadingPaginate, setLoadingPaginate] = useState(false);
@@ -37,7 +35,7 @@ const Paginate: React.FC = () => {
   const onRevoke = (record: APIAssetGrants.Data) => {
     if (data) {
       const temp: APIAssetGrants.Data[] = [...data];
-      Loop.ById(temp, record.id, (item: APIAssetGrants.Data) => (item.loading_revoke = true));
+      Loop.ById(temp, record.id, (item) => (item.loading_revoke = true));
       setData(temp);
     }
 
@@ -53,7 +51,7 @@ const Paginate: React.FC = () => {
       .finally(() => {
         if (data) {
           const temp: APIAssetGrants.Data[] = [...data];
-          Loop.ById(temp, record.id, (item: APIAssetGrants.Data) => (item.loading_revoke = false));
+          Loop.ById(temp, record.id, (item) => (item.loading_revoke = false));
           setData(temp);
         }
       });
@@ -93,16 +91,13 @@ const Paginate: React.FC = () => {
                 />
               </Tooltip>
             </Col>
-            {initialState?.permissions &&
-            initialState?.permissions?.indexOf('dormitory.asset.grant.create') >= 0 ? (
+            <Authorize permission="dormitory.asset.grant.create">
               <Col>
                 <Tooltip title="创建">
                   <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
                 </Tooltip>
               </Col>
-            ) : (
-              <></>
-            )}
+            </Authorize>
           </Row>
         }
       >
@@ -120,15 +115,13 @@ const Paginate: React.FC = () => {
         >
           <Table.Column
             title="设备"
-            render={(record: APIAssetGrants.Data) => (
-              <>
-                {record.devices?.map((item, index) => (
-                  <Tag key={index} color="green">
-                    {item.name} * {item.number}
-                  </Tag>
-                ))}
-              </>
-            )}
+            render={(record: APIAssetGrants.Data) =>
+              record.devices?.map((item) => (
+                <Tag key={item.name} color="green">
+                  {item.name} * {item.number}
+                </Tag>
+              ))
+            }
           />
           <Table.Column
             title="打包"
@@ -148,30 +141,26 @@ const Paginate: React.FC = () => {
           <Table.Column
             align="center"
             width={100}
-            render={(record: APIAssetGrants.Data) =>
-              initialState?.permissions &&
-              initialState?.permissions?.indexOf('dormitory.asset.grant.cancel') >= 0 &&
-              moment(record.created_at).diff(moment(), 'second') >= -86400 ? (
-                <Popconfirm
-                  title="确定要回撤该设备的发放?"
-                  placement="leftTop"
-                  onConfirm={() => onRevoke(record)}
-                >
-                  <Button type="link" danger loading={record.loading_revoke}>
-                    撤销
-                  </Button>
-                </Popconfirm>
-              ) : (
-                <></>
-              )
-            }
+            render={(record: APIAssetGrants.Data) => (
+              <Authorize permission="dormitory.asset.grant.cancel">
+                {moment(record.created_at).diff(moment(), 'second') >= -86400 && (
+                  <Popconfirm
+                    title="确定要回撤该设备的发放?"
+                    placement="leftTop"
+                    onConfirm={() => onRevoke(record)}
+                  >
+                    <Button type="link" danger loading={record.loading_revoke}>
+                      撤销
+                    </Button>
+                  </Popconfirm>
+                )}
+              </Authorize>
+            )}
           />
         </Table>
       </Card>
-      {visible.create != undefined ? (
+      {visible.create != undefined && (
         <Create visible={visible.create} params={editor} onCreate={onSuccess} onCancel={onCancel} />
-      ) : (
-        <></>
       )}
     </>
   );

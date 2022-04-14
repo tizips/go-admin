@@ -18,28 +18,30 @@ import { useModel } from '@@/plugin-model/useModel';
 import Editor from '@/pages/Dormitory/Stay/Category/Editor';
 import { doDelete, doEnable, doList } from './service';
 import Loop from '@/utils/Loop';
+import Authorize from '@/components/Basic/Authorize';
+import Enable from '@/components/Basic/Enable';
 
 const List: React.FC = () => {
   const { initialState } = useModel('@@initialState');
 
   const [editor, setEditor] = useState<APIStayCategories.Data | undefined>();
-  const [loadingPaginate, setLoadingPaginate] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [visible, setVisible] = useState<APIStayCategories.Visible>({});
   const [data, setData] = useState<APIStayCategories.Data[]>();
 
   const toPaginate = () => {
-    setLoadingPaginate(true);
+    setLoading(true);
     doList()
       .then((response: APIResponse.Response<APIStayCategories.Data[]>) => {
         if (response.code === Constants.Success) setData(response.data || []);
       })
-      .finally(() => setLoadingPaginate(false));
+      .finally(() => setLoading(false));
   };
 
   const onDelete = (record: APIStayCategories.Data) => {
     if (data) {
       const temp: APIStayCategories.Data[] = [...data];
-      Loop.ById(temp, record.id, (item: APIStayCategories.Data) => (item.loading_deleted = true));
+      Loop.ById(temp, record.id, (item) => (item.loading_deleted = true));
       setData(temp);
     }
 
@@ -48,18 +50,14 @@ const List: React.FC = () => {
         if (response.code !== Constants.Success) {
           notification.error({ message: response.message });
         } else {
-          notification.success({ message: '类型删除成功！' });
+          notification.success({ message: '删除成功！' });
           toPaginate();
         }
       })
       .finally(() => {
         if (data) {
           const temp: APIStayCategories.Data[] = [...data];
-          Loop.ById(
-            temp,
-            record.id,
-            (item: APIStayCategories.Data) => (item.loading_deleted = false),
-          );
+          Loop.ById(temp, record.id, (item) => (item.loading_deleted = false));
           setData(temp);
         }
       });
@@ -87,7 +85,7 @@ const List: React.FC = () => {
   const onEnable = (record: APIStayCategories.Data) => {
     if (data) {
       const temp: APIStayCategories.Data[] = [...data];
-      Loop.ById(temp, record.id, (item: APIStayCategories.Data) => (item.loading_enable = true));
+      Loop.ById(temp, record.id, (item) => (item.loading_enable = true));
       setData(temp);
     }
 
@@ -99,15 +97,11 @@ const List: React.FC = () => {
           notification.error({ message: response.message });
         } else {
           notification.success({
-            message: `类型${enable.is_enable === 1 ? '启用' : '禁用'}成功！`,
+            message: `${enable.is_enable === 1 ? '启用' : '禁用'}成功！`,
           });
           if (data) {
             const temp = [...data];
-            Loop.ById(
-              temp,
-              record.id,
-              (item: APIStayCategories.Data) => (item.is_enable = enable.is_enable),
-            );
+            Loop.ById(temp, record.id, (item) => (item.is_enable = enable.is_enable));
             setData(temp);
           }
         }
@@ -115,11 +109,7 @@ const List: React.FC = () => {
       .finally(() => {
         if (data) {
           const temp = [...data];
-          Loop.ById(
-            temp,
-            record.id,
-            (item: APIStayCategories.Data) => (item.loading_enable = false),
-          );
+          Loop.ById(temp, record.id, (item) => (item.loading_enable = false));
           setData(temp);
         }
       });
@@ -141,24 +131,21 @@ const List: React.FC = () => {
                   type="primary"
                   icon={<RedoOutlined />}
                   onClick={toPaginate}
-                  loading={loadingPaginate}
+                  loading={loading}
                 />
               </Tooltip>
             </Col>
-            {initialState?.permissions &&
-            initialState?.permissions?.indexOf('dormitory.stay.category.create') >= 0 ? (
+            <Authorize permission="dormitory.stay.category.create">
               <Col>
                 <Tooltip title="创建">
                   <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
                 </Tooltip>
               </Col>
-            ) : (
-              <></>
-            )}
+            </Authorize>
           </Row>
         }
       >
-        <Table dataSource={data} rowKey="id" loading={loadingPaginate} pagination={false}>
+        <Table dataSource={data} rowKey="id" loading={loading} pagination={false}>
           <Table.Column title="名称" dataIndex="name" />
           <Table.Column
             title="入住"
@@ -176,16 +163,17 @@ const List: React.FC = () => {
             title="启用"
             align="center"
             render={(record: APIStayCategories.Data) => (
-              <Switch
-                size="small"
-                checked={record.is_enable === 1}
-                onClick={() => onEnable(record)}
-                disabled={
-                  initialState?.permissions &&
-                  initialState?.permissions?.indexOf('dormitory.stay.category.enable') < 0
-                }
-                loading={record.loading_enable}
-              />
+              <Authorize
+                permission="dormitory.stay.category.enable"
+                fallback={<Enable is_enable={record.is_enable} />}
+              >
+                <Switch
+                  size="small"
+                  checked={record.is_enable === 1}
+                  onClick={() => onEnable(record)}
+                  loading={record.loading_enable}
+                />
+              </Authorize>
             )}
           />
           <Table.Column
@@ -199,16 +187,12 @@ const List: React.FC = () => {
             width={100}
             render={(record: APIStayCategories.Data) => (
               <>
-                {initialState?.permissions &&
-                initialState?.permissions?.indexOf('dormitory.stay.category.update') >= 0 ? (
+                <Authorize permission="dormitory.stay.category.update">
                   <Button type="link" onClick={() => onUpdate(record)}>
                     编辑
                   </Button>
-                ) : (
-                  <></>
-                )}
-                {initialState?.permissions &&
-                initialState?.permissions?.indexOf('dormitory.stay.category.delete') >= 0 ? (
+                </Authorize>
+                <Authorize permission="dormitory.stay.category.delete">
                   <Popconfirm
                     title="确定要删除该数据?"
                     placement="leftTop"
@@ -218,18 +202,14 @@ const List: React.FC = () => {
                       删除
                     </Button>
                   </Popconfirm>
-                ) : (
-                  <></>
-                )}
+                </Authorize>
               </>
             )}
           />
         </Table>
       </Card>
-      {visible.editor != undefined ? (
+      {visible.editor != undefined && (
         <Editor visible={visible.editor} params={editor} onSave={onSuccess} onCancel={onCancel} />
-      ) : (
-        <></>
       )}
     </>
   );

@@ -17,6 +17,8 @@ import { useModel } from '@@/plugin-model/useModel';
 import Editor from '@/pages/Site/Architecture/Module/Editor';
 import { doDelete, doEnable, doList } from './service';
 import Loop from '@/utils/Loop';
+import Authorize from '@/components/Basic/Authorize';
+import Enable from '@/components/Basic/Enable';
 
 const Tree: React.FC = () => {
   const { initialState } = useModel('@@initialState');
@@ -25,16 +27,6 @@ const Tree: React.FC = () => {
   const [loadingPaginate, setLoadingPaginate] = useState(false);
   const [visible, setVisible] = useState<APIArchitectureModules.Visible>({});
   const [data, setData] = useState<APIArchitectureModules.Data[]>();
-
-  const doLoop = (
-    items: APIArchitectureModules.Data[],
-    callback: (item: APIArchitectureModules.Data) => void,
-  ) => {
-    for (const temp of items) {
-      callback(temp);
-      if (temp.children) doLoop(temp.children, callback);
-    }
-  };
 
   const toList = () => {
     setLoadingPaginate(true);
@@ -50,9 +42,11 @@ const Tree: React.FC = () => {
   const onDelete = (record: APIArchitectureModules.Data) => {
     if (data) {
       const temp: APIArchitectureModules.Data[] = [...data];
-      doLoop(temp, (item) => {
-        if (item.id === record.id) item.loading_deleted = true;
-      });
+      Loop.ById(
+        temp,
+        record.id,
+        (item: APIArchitectureModules.Data) => (item.loading_deleted = true),
+      );
       setData(temp);
     }
 
@@ -68,9 +62,11 @@ const Tree: React.FC = () => {
       .finally(() => {
         if (data) {
           const temp: APIArchitectureModules.Data[] = [...data];
-          Loop.ById(temp, record.id, (item: APIArchitectureModules.Data) => {
-            item.loading_deleted = false;
-          });
+          Loop.ById(
+            temp,
+            record.id,
+            (item: APIArchitectureModules.Data) => (item.loading_deleted = false),
+          );
           setData(temp);
         }
       });
@@ -79,9 +75,11 @@ const Tree: React.FC = () => {
   const onEnable = (record: APIArchitectureModules.Data) => {
     if (data) {
       const temp: APIArchitectureModules.Data[] = [...data];
-      doLoop(temp, (item) => {
-        if (item.id === record.id) item.loading_enable = true;
-      });
+      Loop.ById(
+        temp,
+        record.id,
+        (item: APIArchitectureModules.Data) => (item.loading_enable = true),
+      );
       setData(temp);
     }
 
@@ -97,9 +95,11 @@ const Tree: React.FC = () => {
           });
           if (data) {
             const temp = [...data];
-            doLoop(temp, (item) => {
-              if (item.id === record.id) item.is_enable = enable.is_enable;
-            });
+            Loop.ById(
+              temp,
+              record.id,
+              (item: APIArchitectureModules.Data) => (item.is_enable = enable.is_enable),
+            );
             setData(temp);
           }
         }
@@ -107,9 +107,11 @@ const Tree: React.FC = () => {
       .finally(() => {
         if (data) {
           const temp = [...data];
-          doLoop(temp, (item) => {
-            if (item.id === record.id) item.loading_enable = false;
-          });
+          Loop.ById(
+            temp,
+            record.id,
+            (item: APIArchitectureModules.Data) => (item.loading_deleted = false),
+          );
           setData(temp);
         }
       });
@@ -154,16 +156,13 @@ const Tree: React.FC = () => {
                 />
               </Tooltip>
             </Col>
-            {initialState?.permissions &&
-            initialState?.permissions?.indexOf('site.architecture.module.create') >= 0 ? (
+            <Authorize permission="site.architecture.module.create">
               <Col>
                 <Tooltip title="创建">
                   <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
                 </Tooltip>
               </Col>
-            ) : (
-              <></>
-            )}
+            </Authorize>
           </Row>
         }
       >
@@ -193,16 +192,17 @@ const Tree: React.FC = () => {
             title="启用"
             align="center"
             render={(record: APIArchitectureModules.Data) => (
-              <Switch
-                size="small"
-                checked={record.is_enable === 1}
-                onClick={() => onEnable(record)}
-                disabled={
-                  initialState?.permissions &&
-                  initialState?.permissions?.indexOf('site.architecture.module.enable') < 0
-                }
-                loading={record.loading_enable}
-              />
+              <Authorize
+                permission="site.architecture.module.enable"
+                fallback={<Enable is_enable={record.is_enable} />}
+              >
+                <Switch
+                  size="small"
+                  checked={record.is_enable === 1}
+                  onClick={() => onEnable(record)}
+                  loading={record.loading_enable}
+                />
+              </Authorize>
             )}
           />
           <Table.Column
@@ -210,17 +210,12 @@ const Tree: React.FC = () => {
             width={100}
             render={(record: APIArchitectureModules.Data) => (
               <>
-                {initialState?.permissions &&
-                initialState?.permissions?.indexOf('site.architecture.module.create') >= 0 ? (
+                <Authorize permission="site.architecture.module.create">
                   <Button type="link" onClick={() => onUpdate(record)}>
                     编辑
                   </Button>
-                ) : (
-                  <></>
-                )}
-                {initialState?.permissions &&
-                initialState?.permissions?.indexOf('site.architecture.module.delete') >= 0 &&
-                !record.children ? (
+                </Authorize>
+                <Authorize permission="site.architecture.module.delete">
                   <Popconfirm
                     title="确定要删除该数据?"
                     placement="leftTop"
@@ -230,18 +225,14 @@ const Tree: React.FC = () => {
                       删除
                     </Button>
                   </Popconfirm>
-                ) : (
-                  <></>
-                )}
+                </Authorize>
               </>
             )}
           />
         </Table>
       </Card>
-      {visible.editor != undefined ? (
+      {visible.editor != undefined && (
         <Editor visible={visible.editor} params={editor} onSave={onSuccess} onCancel={onCancel} />
-      ) : (
-        <></>
       )}
     </>
   );

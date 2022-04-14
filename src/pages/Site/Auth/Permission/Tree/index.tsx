@@ -12,9 +12,9 @@ import {
   Tooltip,
 } from 'antd';
 import Constants from '@/utils/Constants';
-import moment from 'moment';
 import { FormOutlined, RedoOutlined } from '@ant-design/icons';
 import { useModel } from '@@/plugin-model/useModel';
+import Authorize from '@/components/Basic/Authorize';
 import Editor from '@/pages/Site/Auth/Permission/Editor';
 import { doDelete, doTree } from './service';
 import Loop from '@/utils/Loop';
@@ -40,16 +40,6 @@ const Tree: React.FC = () => {
   const [loading, setLoading] = useState<APIAuthPermissions.Loading>({});
   const [active, setActive] = useState<APIAuthPermissions.Active>({});
 
-  const doLoop = (
-    items: APIAuthPermissions.Data[],
-    callback: (item: APIAuthPermissions.Data) => void,
-  ) => {
-    for (const temp of items) {
-      callback(temp);
-      if (temp.children) doLoop(temp.children, callback);
-    }
-  };
-
   const toModules = () => {
     setLoading({ ...loading, module: true });
     doModuleByOnline()
@@ -66,38 +56,33 @@ const Tree: React.FC = () => {
     setLoadingPaginate(true);
     doTree(active.module)
       .then((response: APIResponse.Response<APIAuthPermissions.Data[]>) => {
-        if (response.code === Constants.Success) {
-          const temp: APIAuthPermissions.Data[] = response.data;
-          doLoop(temp, (item) => (item.created_at = moment(item.created_at)));
-          setData(temp);
-        }
+        if (response.code === Constants.Success) setData(response.data);
       })
       .finally(() => setLoadingPaginate(false));
   };
 
   const onDelete = (record: APIAuthPermissions.Data) => {
-    // @ts-ignore
-    let temp: APIAuthPermissions.Data[] = [...data];
-    Loop.ById(temp, record.id, (item: APIAuthPermissions.Data) => (item.loading_deleted = true));
-    setData(temp);
+    if (data) {
+      const temp = [...data];
+      Loop.ById(temp, record.id, (item) => (item.loading_deleted = true));
+      setData(temp);
+    }
 
     doDelete(record.id)
       .then((response: APIResponse.Response<any>) => {
         if (response.code !== Constants.Success) {
           notification.error({ message: response.message });
         } else {
-          notification.success({ message: '权限删除成功！' });
+          notification.success({ message: '删除成功！' });
           toTree();
         }
       })
       .finally(() => {
-        temp = [...data];
-        Loop.ById(
-          temp,
-          record.id,
-          (item: APIAuthPermissions.Data) => (item.loading_deleted = false),
-        );
-        setData(temp);
+        if (data) {
+          const temp = [...data];
+          Loop.ById(temp, record.id, (item) => (item.loading_deleted = false));
+          setData(temp);
+        }
       });
   };
 
@@ -157,16 +142,13 @@ const Tree: React.FC = () => {
                 />
               </Tooltip>
             </Col>
-            {initialState?.permissions &&
-            initialState?.permissions?.indexOf('site.auth.permission.create') >= 0 ? (
+            <Authorize permission="site.auth.permission.create">
               <Col>
                 <Tooltip title="创建">
                   <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
                 </Tooltip>
               </Col>
-            ) : (
-              <></>
-            )}
+            </Authorize>
           </Row>
         }
       >
@@ -181,35 +163,29 @@ const Tree: React.FC = () => {
           <Table.Column
             title="标识"
             render={(record: APIAuthPermissions.Data) => (
-              <span className={styles.slug} style={{ color: initialState?.settings?.primaryColor }}>
-                {record.slug}
-              </span>
+              <span style={{ color: initialState?.settings?.primaryColor }}>{record.slug}</span>
             )}
           />
           <Table.Column
             title="接口"
             align="right"
             render={(record: APIAuthPermissions.Data) =>
-              record.method ? (
+              record.method && (
                 <Tag color={record.method && methods ? methods[record.method] : '#2db7f5'}>
                   {record.method?.toUpperCase()}
                 </Tag>
-              ) : (
-                <></>
               )
             }
           />
           <Table.Column
             render={(record: APIAuthPermissions.Data) =>
-              record.path ? (
+              record.path && (
                 <Tag
                   className={styles.path}
                   style={{ color: initialState?.settings?.primaryColor }}
                 >
                   {record.path}
                 </Tag>
-              ) : (
-                <></>
               )
             }
           />
@@ -219,17 +195,12 @@ const Tree: React.FC = () => {
             width={100}
             render={(record: APIAuthPermissions.Data) => (
               <>
-                {initialState?.permissions &&
-                initialState?.permissions?.indexOf('site.auth.permission.update') >= 0 ? (
+                <Authorize permission="site.auth.permission.update">
                   <Button type="link" onClick={() => onUpdate(record)}>
                     编辑
                   </Button>
-                ) : (
-                  <></>
-                )}
-                {initialState?.permissions &&
-                initialState?.permissions?.indexOf('site.auth.permission.delete') >= 0 &&
-                !record.children ? (
+                </Authorize>
+                <Authorize permission="site.auth.permission.delete">
                   <Popconfirm
                     title="确定要删除该数据?"
                     placement="leftTop"
@@ -239,15 +210,13 @@ const Tree: React.FC = () => {
                       删除
                     </Button>
                   </Popconfirm>
-                ) : (
-                  <></>
-                )}
+                </Authorize>
               </>
             )}
           />
         </Table>
       </Card>
-      {visible.editor != undefined ? (
+      {visible.editor != undefined && (
         <Editor
           visible={visible.editor}
           params={editor}
@@ -256,8 +225,6 @@ const Tree: React.FC = () => {
           onSave={onSuccess}
           onCancel={onCancel}
         />
-      ) : (
-        <></>
       )}
     </>
   );

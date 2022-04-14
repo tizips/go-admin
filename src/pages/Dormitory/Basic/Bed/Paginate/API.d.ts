@@ -8,7 +8,7 @@ declare namespace APIBasicBeds {
     order?: number;
     is_enable?: number;
     is_public?: number;
-    created_at?: string | moment.Moment;
+    created_at?: string;
     loading_deleted?: boolean;
     loading_enable?: boolean;
     loading_furnish?: boolean;
@@ -20,6 +20,7 @@ declare namespace APIBasicBeds {
 
   type Search = {
     page?: number;
+    is_public?: number;
     building?: number;
     floor?: number;
     room?: number;

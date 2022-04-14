@@ -3,14 +3,12 @@ import { Button, Card, Col, notification, Popconfirm, Row, Table, Tooltip } from
 import Constants from '@/utils/Constants';
 import moment from 'moment';
 import { FormOutlined, RedoOutlined } from '@ant-design/icons';
-import { useModel } from '@@/plugin-model/useModel';
 import Editor from '@/pages/Site/Auth/Role/Editor';
 import { doDelete, doPaginate } from './service';
 import Loop from '@/utils/Loop';
+import Authorize from '@/components/Basic/Authorize';
 
 const Paginate: React.FC = () => {
-  const { initialState } = useModel('@@initialState');
-
   const [search, setSearch] = useState<APIAuthRoles.Search>({});
   const [editor, setEditor] = useState<APIAuthRoles.Data | undefined>();
   const [loadingPaginate, setLoadingPaginate] = useState(false);
@@ -28,8 +26,6 @@ const Paginate: React.FC = () => {
             page: response.data.page,
             total: response.data.total,
           });
-          if (response.data.data)
-            response.data.data.forEach((item) => (item.created_at = moment(item.created_at)));
           setData(response.data.data);
         }
       })
@@ -37,10 +33,11 @@ const Paginate: React.FC = () => {
   };
 
   const onDelete = (record: APIAuthRoles.Data) => {
-    // @ts-ignore
-    let temp: APIAuthRoles.Data[] = [...data];
-    Loop.ById(temp, record.id, (item: APIAuthRoles.Data) => (item.loading_deleted = true));
-    setData(temp);
+    if (data) {
+      const temp: APIAuthRoles.Data[] = [...data];
+      Loop.ById(temp, record.id, (item) => (item.loading_deleted = true));
+      setData(temp);
+    }
 
     doDelete(record.id)
       .then((response: APIResponse.Response<any>) => {
@@ -52,9 +49,11 @@ const Paginate: React.FC = () => {
         }
       })
       .finally(() => {
-        temp = [...data];
-        Loop.ById(temp, record.id, (item: APIAuthRoles.Data) => (item.loading_deleted = false));
-        setData(temp);
+        if (data) {
+          const temp = [...data];
+          Loop.ById(temp, record.id, (item) => (item.loading_deleted = false));
+          setData(temp);
+        }
       });
   };
 
@@ -97,16 +96,13 @@ const Paginate: React.FC = () => {
                 />
               </Tooltip>
             </Col>
-            {initialState?.permissions &&
-            initialState?.permissions?.indexOf('site.auth.role.create') >= 0 ? (
+            <Authorize permission="site.auth.role.create">
               <Col>
                 <Tooltip title="创建">
                   <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
                 </Tooltip>
               </Col>
-            ) : (
-              <></>
-            )}
+            </Authorize>
           </Row>
         }
       >
@@ -126,25 +122,21 @@ const Paginate: React.FC = () => {
           <Table.Column
             title="创建时间"
             render={(record: APIAuthRoles.Data) =>
-              moment.isMoment(record.created_at) && record.created_at.format('YYYY/MM/DD HH:mm')
+              record.created_at && moment(record.created_at).format('YYYY/MM/DD')
             }
           />
           <Table.Column
             title="操作"
             align="center"
             width={100}
-            render={(record: APIAuthAdmins.Data) => (
+            render={(record: APIAuthRoles.Data) => (
               <>
-                {initialState?.permissions &&
-                initialState?.permissions?.indexOf('site.auth.role.update') >= 0 ? (
+                <Authorize permission="site.auth.role.update">
                   <Button type="link" onClick={() => onUpdate(record)}>
                     编辑
                   </Button>
-                ) : (
-                  <></>
-                )}
-                {initialState?.permissions &&
-                initialState?.permissions?.indexOf('site.auth.role.delete') >= 0 ? (
+                </Authorize>
+                <Authorize permission="site.auth.role.delete">
                   <Popconfirm
                     title="确定要删除该数据?"
                     placement="leftTop"
@@ -154,18 +146,14 @@ const Paginate: React.FC = () => {
                       删除
                     </Button>
                   </Popconfirm>
-                ) : (
-                  <></>
-                )}
+                </Authorize>
               </>
             )}
           />
         </Table>
       </Card>
-      {visible.editor != undefined ? (
+      {visible.editor != undefined && (
         <Editor visible={visible.editor} params={editor} onSave={onSuccess} onCancel={onCancel} />
-      ) : (
-        <></>
       )}
     </>
   );
