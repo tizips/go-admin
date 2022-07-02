@@ -1,7 +1,7 @@
-declare namespace APIBasicType {
+declare namespace APIDormitoryBasicType {
   type Props = {
     visible?: boolean;
-    params?: APIBasicTypes.Data;
+    params?: APIDormitoryBasicTypes.Data;
     onCreate?: () => void;
     onUpdate?: () => void;
     onSave?: () => void;

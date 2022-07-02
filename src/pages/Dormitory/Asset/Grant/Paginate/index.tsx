@@ -9,17 +9,17 @@ import Loop from '@/utils/Loop';
 import Authorize from '@/components/Basic/Authorize';
 
 const Paginate: React.FC = () => {
-  const [editor, setEditor] = useState<APIAssetGrants.Data | undefined>();
-  const [search, setSearch] = useState<APIAssetGrants.Search>({});
+  const [editor, setEditor] = useState<APIDormitoryAssetGrants.Data | undefined>();
+  const [search, setSearch] = useState<APIDormitoryAssetGrants.Search>({});
   const [loadingPaginate, setLoadingPaginate] = useState(false);
-  const [visible, setVisible] = useState<APIAssetGrants.Visible>({});
-  const [data, setData] = useState<APIAssetGrants.Data[]>();
+  const [visible, setVisible] = useState<APIDormitoryAssetGrants.Visible>({});
+  const [data, setData] = useState<APIDormitoryAssetGrants.Data[]>();
   const [paginate, setPaginate] = useState<APIData.Paginate>({});
 
   const toPaginate = () => {
     setLoadingPaginate(true);
     doPaginate(search)
-      .then((response: APIResponse.Paginate<APIAssetGrants.Data[]>) => {
+      .then((response: APIResponse.Paginate<APIDormitoryAssetGrants.Data[]>) => {
         if (response.code === Constants.Success) {
           setPaginate({
             page: response.data.page,
@@ -32,9 +32,9 @@ const Paginate: React.FC = () => {
       .finally(() => setLoadingPaginate(false));
   };
 
-  const onRevoke = (record: APIAssetGrants.Data) => {
+  const onRevoke = (record: APIDormitoryAssetGrants.Data) => {
     if (data) {
-      const temp: APIAssetGrants.Data[] = [...data];
+      const temp: APIDormitoryAssetGrants.Data[] = [...data];
       Loop.ById(temp, record.id, (item) => (item.loading_revoke = true));
       setData(temp);
     }
@@ -50,7 +50,7 @@ const Paginate: React.FC = () => {
       })
       .finally(() => {
         if (data) {
-          const temp: APIAssetGrants.Data[] = [...data];
+          const temp: APIDormitoryAssetGrants.Data[] = [...data];
           Loop.ById(temp, record.id, (item) => (item.loading_revoke = false));
           setData(temp);
         }
@@ -115,7 +115,7 @@ const Paginate: React.FC = () => {
         >
           <Table.Column
             title="设备"
-            render={(record: APIAssetGrants.Data) =>
+            render={(record: APIDormitoryAssetGrants.Data) =>
               record.devices?.map((item) => (
                 <Tag key={item.name} color="green">
                   {item.name} * {item.number}
@@ -125,7 +125,7 @@ const Paginate: React.FC = () => {
           />
           <Table.Column
             title="打包"
-            render={(record: APIAssetGrants.Data) => (
+            render={(record: APIDormitoryAssetGrants.Data) => (
               <Tag color={record.package ? '#2db7f5' : '#f50'}>
                 {record.package ? record.package : '无'}
               </Tag>
@@ -134,14 +134,14 @@ const Paginate: React.FC = () => {
           <Table.Column title="备注" dataIndex="remark" />
           <Table.Column
             title="创建时间"
-            render={(record: APIAssetGrants.Data) =>
+            render={(record: APIDormitoryAssetGrants.Data) =>
               record.created_at && moment(record.created_at).format('YYYY/MM/DD')
             }
           />
           <Table.Column
             align="center"
             width={100}
-            render={(record: APIAssetGrants.Data) => (
+            render={(record: APIDormitoryAssetGrants.Data) => (
               <Authorize permission="dormitory.asset.grant.cancel">
                 {moment(record.created_at).diff(moment(), 'second') >= -86400 && (
                   <Popconfirm

@@ -24,19 +24,19 @@ import Loop from '@/utils/Loop';
 import Authorize from '@/components/Basic/Authorize';
 
 const Paginate: React.FC = () => {
-  const [filter, setFilter] = useState<APIStayPeoples.Filter>({});
-  const [search, setSearch] = useState<APIStayPeoples.Search>({ status: 'live' });
+  const [filter, setFilter] = useState<APIDormitoryStayPeoples.Filter>({});
+  const [search, setSearch] = useState<APIDormitoryStayPeoples.Search>({ status: 'live' });
   const [loadingPaginate, setLoadingPaginate] = useState(false);
-  const [visible, setVisible] = useState<APIStayPeoples.Visible>({});
-  const [buildings, setBuildings] = useState<APIResponse.Online[]>([]);
+  const [visible, setVisible] = useState<APIDormitoryStayPeoples.Visible>({});
+  const [buildings, setBuildings] = useState<APIData.Online[]>([]);
   const [positions, setPositions] = useState<APIData.Tree[]>([]);
-  const [data, setData] = useState<APIStayPeoples.Data[]>();
+  const [data, setData] = useState<APIDormitoryStayPeoples.Data[]>();
   const [paginate, setPaginate] = useState<APIData.Paginate>({});
   const [expands, setExpands] = useState<any[]>([]);
 
   const toBuildingsByOnline = () => {
     doBuildingByOnline({ is_public: 2 }).then(
-      (response: APIResponse.Response<APIResponse.Online[]>) => {
+      (response: APIResponse.Response<APIData.Online[]>) => {
         if (response.code == Constants.Success) {
           setBuildings(response.data || []);
         }
@@ -46,7 +46,7 @@ const Paginate: React.FC = () => {
 
   const toFloorsByOnline = (id?: number) => {
     doFloorByOnline(id, { is_public: 2 }).then(
-      (response: APIResponse.Response<APIResponse.Online[]>) => {
+      (response: APIResponse.Response<APIData.Online[]>) => {
         const temp = [...positions];
         Loop.ById(
           temp,
@@ -69,7 +69,7 @@ const Paginate: React.FC = () => {
   const toPaginate = () => {
     setLoadingPaginate(true);
     doPaginate(search)
-      .then((response: APIResponse.Paginate<APIStayPeoples.Data[]>) => {
+      .then((response: APIResponse.Paginate<APIDormitoryStayPeoples.Data[]>) => {
         if (response.code === Constants.Success) {
           setPaginate({
             page: response.data.page,
@@ -85,9 +85,9 @@ const Paginate: React.FC = () => {
       .finally(() => setLoadingPaginate(false));
   };
 
-  const onDelete = (record: APIStayPeoples.Data) => {
+  const onDelete = (record: APIDormitoryStayPeoples.Data) => {
     if (data) {
-      const temp: APIStayPeoples.Data[] = [...data];
+      const temp: APIDormitoryStayPeoples.Data[] = [...data];
       Loop.ById(temp, record.id, (item) => (item.loading_deleted = true));
       setData(temp);
     }
@@ -103,7 +103,7 @@ const Paginate: React.FC = () => {
       })
       .finally(() => {
         if (data) {
-          const temp: APIStayPeoples.Data[] = [...data];
+          const temp: APIDormitoryStayPeoples.Data[] = [...data];
           Loop.ById(temp, record.id, (item) => (item.loading_deleted = false));
           setData(temp);
         }
@@ -122,37 +122,6 @@ const Paginate: React.FC = () => {
   const onCancel = () => {
     setVisible({ ...visible, create: false });
   };
-  //
-  // const onEnable = (record: APIStayPeoples.Data) => {
-  //   if (data) {
-  //     const temp: APIStayPeoples.Data[] = [...data];
-  //     Loop.byId(temp, record.id, (item: APIStayPeoples.Data) => item.loading_enable = true);
-  //     setData(temp);
-  //   }
-  //
-  //   const enable: APIRequest.Enable = { id: record.id, is_enable: record.is_enable === 1 ? 0 : 1 };
-  //
-  //   doEnable(enable)
-  //     .then((response: APIResponse.Response<any>) => {
-  //       if (response.code !== Constants.Success) {
-  //         notification.error({ message: response.message });
-  //       } else {
-  //         notification.success({ message: `房间${enable.is_enable === 1 ? '启用' : '禁用'}成功！` });
-  //         if (data) {
-  //           const temp = [...data];
-  //           Loop.byId(temp, record.id, (item: APIStayPeoples.Data) => item.is_enable = enable.is_enable);
-  //           setData(temp);
-  //         }
-  //       }
-  //     })
-  //     .finally(() => {
-  //       if (data) {
-  //         const temp = [...data];
-  //         Loop.byId(temp, record.id, (item: APIStayPeoples.Data) => item.loading_enable = false);
-  //         setData(temp);
-  //       }
-  //     });
-  // };
 
   const onPositions = (values: APIData.Tree[]) => {
     const value = values[values.length - 1];
@@ -188,7 +157,7 @@ const Paginate: React.FC = () => {
     if (buildings.length <= 0) toBuildingsByOnline();
   }, []);
 
-  const toRenderExpandable = (record: APIStayPeoples.Data) => {
+  const toRenderExpandable = (record: APIDormitoryStayPeoples.Data) => {
     return (
       <Descriptions>
         <Descriptions.Item label="办理时间">
@@ -332,7 +301,7 @@ const Paginate: React.FC = () => {
           <Table.Column
             title="房间"
             key="building"
-            render={(record: APIStayPeoples.Data) =>
+            render={(record: APIDormitoryStayPeoples.Data) =>
               `${record.building}-${record.floor}-${record.room}-${record.bed}`
             }
           />
@@ -341,7 +310,7 @@ const Paginate: React.FC = () => {
           <Table.Column
             title="临时"
             align="center"
-            render={(record: APIStayPeoples.Data) => (
+            render={(record: APIDormitoryStayPeoples.Data) => (
               <Tag color={record.is_temp === 2 ? '#87d068' : '#f50'}>
                 {record.is_temp === 2 ? '正式' : '临时'}
               </Tag>
@@ -350,7 +319,7 @@ const Paginate: React.FC = () => {
           <Table.Column
             align="center"
             width={100}
-            render={(record: APIStayPeoples.Data) => (
+            render={(record: APIDormitoryStayPeoples.Data) => (
               <>
                 <Authorize permission="dormitory.live.live.leave">
                   <Popconfirm

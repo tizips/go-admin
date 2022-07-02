@@ -1,4 +1,4 @@
-declare namespace APIBasicBuildings {
+declare namespace APIDormitoryBasicBuildings {
   type Data = {
     id?: number;
     name?: string;

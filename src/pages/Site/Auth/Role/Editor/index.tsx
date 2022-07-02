@@ -3,22 +3,15 @@ import React, { useEffect, useState } from 'react';
 import { doCreate, doPermissionBySelf, doUpdate } from './service';
 import Constants from '@/utils/Constants';
 
-const Editor: React.FC<APIAuthRole.Props> = (props) => {
-
-  const init: APIAuthRole.Former = {
-    name: '',
-    summary: '',
-    permissions: [],
-  };
-
-  const [former] = Form.useForm();
+const Editor: React.FC<APISiteAuthRole.Props> = (props) => {
+  const [former] = Form.useForm<APISiteAuthRole.Former>();
   const [permissions, setPermissions] = useState<any[]>([]);
-  const [loading, setLoading] = useState<APIAuthRole.Loading>({});
+  const [loading, setLoading] = useState<APISiteAuthRole.Loading>({});
 
   const toPermissions = () => {
     setLoading({ ...loading, permission: true });
     doPermissionBySelf()
-      .then((response: APIResponse.Response<APIAuthRole.Permission[]>) => {
+      .then((response: APIResponse.Response<APISiteAuthRole.Permission[]>) => {
         if (response.code === Constants.Success) {
           setPermissions(response.data);
         }
@@ -58,8 +51,8 @@ const Editor: React.FC<APIAuthRole.Props> = (props) => {
       .finally(() => setLoading({ ...loading, confirmed: false }));
   };
 
-  const onSubmit = (values: APIAuthRole.Former) => {
-    const params: APIAuthRole.Editor = {
+  const onSubmit = (values: APISiteAuthRole.Former) => {
+    const params: APISiteAuthRole.Editor = {
       name: values.name,
       summary: values.summary,
       permissions: values.permissions,
@@ -70,12 +63,18 @@ const Editor: React.FC<APIAuthRole.Props> = (props) => {
   };
 
   const toInit = () => {
-    const data = init;
+    const data: APISiteAuthRole.Former = {
+      name: '',
+      summary: '',
+      permissions: [],
+    };
+
     if (props.params) {
       data.name = props.params.name;
       data.permissions = props.params.permissions;
       data.summary = props.params.summary;
     }
+
     former.setFieldsValue(data);
   };
 
@@ -87,17 +86,28 @@ const Editor: React.FC<APIAuthRole.Props> = (props) => {
   }, [props.visible]);
 
   return (
-    <Modal title={props.params ? '编辑' : '创建'} visible={props.visible} centered onOk={former.submit}
-           maskClosable={false} onCancel={props.onCancel} confirmLoading={loading.confirmed}>
-      <Form form={former} initialValues={init} onFinish={onSubmit} labelCol={{ span: 3 }}>
-        <Form.Item label='名称' name='name' rules={[{ required: true }, { max: 20 }]}>
+    <Modal
+      title={props.params ? '编辑' : '创建'}
+      visible={props.visible}
+      centered
+      onOk={former.submit}
+      maskClosable={false}
+      onCancel={props.onCancel}
+      confirmLoading={loading.confirmed}
+    >
+      <Form form={former} onFinish={onSubmit} labelCol={{ span: 3 }}>
+        <Form.Item label="名称" name="name" rules={[{ required: true }, { max: 20 }]}>
           <Input />
         </Form.Item>
-        <Form.Item label='权限' name='permissions' rules={[{ required: true }]}>
-          <Cascader options={permissions} fieldNames={{ label: 'name', value: 'id' }}
-                    multiple maxTagCount='responsive' />
+        <Form.Item label="权限" name="permissions" rules={[{ required: true }]}>
+          <Cascader
+            options={permissions}
+            fieldNames={{ label: 'name', value: 'id' }}
+            multiple
+            maxTagCount="responsive"
+          />
         </Form.Item>
-        <Form.Item label='简介' name='summary' rules={[{ max: 255 }]}>
+        <Form.Item label="简介" name="summary" rules={[{ max: 255 }]}>
           <Input.TextArea rows={2} maxLength={255} showCount />
         </Form.Item>
       </Form>

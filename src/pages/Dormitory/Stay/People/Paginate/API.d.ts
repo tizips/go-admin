@@ -1,4 +1,4 @@
-declare namespace APIStayPeoples {
+declare namespace APIDormitoryStayPeoples {
   type Data = {
     id?: number;
     category?: string;

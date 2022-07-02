@@ -6,27 +6,15 @@ import { doAssetCategoryByOnline } from '@/services/dormitory';
 
 import styles from './index.less';
 
-const Create: React.FC<APIAssetDevice.Props> = (props) => {
-  const init: APIAssetDevice.Former = {
-    category: undefined,
-    no: '',
-    name: '',
-    specification: '',
-    stock: 0,
-    price: '',
-    unit: '',
-    indemnity: '',
-    remark: '',
-  };
-
-  const [former] = Form.useForm();
-  const [loading, setLoading] = useState<APIAssetDevice.Loading>({});
-  const [categories, setCategories] = useState<APIResponse.Online[]>([]);
+const Create: React.FC<APIDormitoryAssetDevice.Props> = (props) => {
+  const [former] = Form.useForm<APIDormitoryAssetDevice.Former>();
+  const [loading, setLoading] = useState<APIDormitoryAssetDevice.Loading>({});
+  const [categories, setCategories] = useState<APIData.Online[]>([]);
 
   const toCategoriesByOnline = () => {
     setLoading({ ...loading, category: true });
     doAssetCategoryByOnline()
-      .then((response: APIResponse.Response<APIResponse.Online[]>) => {
+      .then((response: APIResponse.Response<APIData.Online[]>) => {
         if (response.code == Constants.Success) setCategories(response.data);
       })
       .finally(() => setLoading({ ...loading, category: false }));
@@ -62,8 +50,8 @@ const Create: React.FC<APIAssetDevice.Props> = (props) => {
       .finally(() => setLoading({ ...loading, confirmed: false }));
   };
 
-  const onSubmit = (values: APIAssetDevice.Former) => {
-    const params: APIAssetDevice.Editor = {
+  const onSubmit = (values: APIDormitoryAssetDevice.Former) => {
+    const params: APIDormitoryAssetDevice.Editor = {
       category: values.category,
       no: values.no,
       name: values.name,
@@ -83,7 +71,17 @@ const Create: React.FC<APIAssetDevice.Props> = (props) => {
   };
 
   const toInit = () => {
-    const data = init;
+    const data: APIDormitoryAssetDevice.Former = {
+      category: undefined,
+      no: '',
+      name: '',
+      specification: '',
+      stock: 0,
+      price: '',
+      unit: '',
+      indemnity: '',
+      remark: '',
+    };
 
     if (props.params) {
       data.category = props.params.category_id;
@@ -119,7 +117,7 @@ const Create: React.FC<APIAssetDevice.Props> = (props) => {
       onCancel={props.onCancel}
       confirmLoading={loading.confirmed}
     >
-      <Form form={former} initialValues={init} onFinish={onSubmit} labelCol={{ span: 5 }}>
+      <Form form={former} onFinish={onSubmit} labelCol={{ span: 5 }}>
         <Row gutter={10}>
           <Col span={11}>
             <Form.Item label="类型" name="category" rules={[{ required: true }]}>

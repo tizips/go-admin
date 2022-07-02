@@ -5,23 +5,15 @@ import Constants from '@/utils/Constants';
 import { doFloorByOnline, doRoomByOnline } from '@/services/dormitory';
 import Loop from '@/utils/Loop';
 
-const Editor: React.FC<APIBasicBed.Props> = (props) => {
-  const init: APIBasicBed.Former = {
-    name: '',
-    positions: undefined,
-    order: 50,
-    is_enable: 1,
-    is_public: 2,
-  };
-
-  const [former] = Form.useForm();
-  const [filter, setFilter] = useState<APIBasicBed.Filter>({});
-  const [loading, setLoading] = useState<APIBasicBed.Loading>({});
+const Editor: React.FC<APDormitoryIBasicBed.Props> = (props) => {
+  const [former] = Form.useForm<APDormitoryIBasicBed.Former>();
+  const [filter, setFilter] = useState<APDormitoryIBasicBed.Filter>({});
+  const [loading, setLoading] = useState<APDormitoryIBasicBed.Loading>({});
   const [positions, setPositions] = useState<APIData.Tree[]>([]);
 
   const toFloorsByOnline = (id?: number) => {
     doFloorByOnline(id, { is_public: 2 }).then(
-      (response: APIResponse.Response<APIResponse.Online[]>) => {
+      (response: APIResponse.Response<APIData.Online[]>) => {
         const data = [...positions];
         Loop.ById(
           data,
@@ -48,7 +40,7 @@ const Editor: React.FC<APIBasicBed.Props> = (props) => {
 
   const toRoomsByOnline = (id?: number) => {
     doRoomByOnline(id, { is_public: 2 }).then(
-      (response: APIResponse.Response<APIResponse.Online[]>) => {
+      (response: APIResponse.Response<APIData.Online[]>) => {
         const data = [...positions];
         Loop.ById(
           data,
@@ -99,8 +91,8 @@ const Editor: React.FC<APIBasicBed.Props> = (props) => {
       .finally(() => setLoading({ ...loading, confirmed: false }));
   };
 
-  const onSubmit = (values: APIBasicBed.Former) => {
-    const params: APIBasicBed.Editor = {
+  const onSubmit = (values: APDormitoryIBasicBed.Former) => {
+    const params: APDormitoryIBasicBed.Editor = {
       name: values.name,
       order: values.order,
       is_enable: values.is_enable,
@@ -126,7 +118,13 @@ const Editor: React.FC<APIBasicBed.Props> = (props) => {
   const toInit = () => {
     setFilter({ ...filter, building: undefined });
 
-    const data = init;
+    const data: APDormitoryIBasicBed.Former = {
+      name: '',
+      positions: undefined,
+      order: 50,
+      is_enable: 1,
+      is_public: 2,
+    };
 
     if (props.params) {
       data.name = props.params.name;
@@ -165,7 +163,7 @@ const Editor: React.FC<APIBasicBed.Props> = (props) => {
       onCancel={props.onCancel}
       confirmLoading={loading.confirmed}
     >
-      <Form form={former} initialValues={init} onFinish={onSubmit}>
+      <Form form={former} onFinish={onSubmit}>
         <Form.Item label="名称" name="name" rules={[{ required: true }, { max: 20 }]}>
           <Input />
         </Form.Item>

@@ -7,6 +7,7 @@ import routes from './routes';
 const { REACT_APP_ENV } = process.env;
 export default defineConfig({
   hash: true,
+  access: {},
   antd: {},
   cssLoader: {
     localsConvention: 'camelCase',
@@ -23,8 +24,8 @@ export default defineConfig({
     default: 'zh-CN',
   },
   dynamicImport: {
-    // loading: '@ant-design/pro-layout/es/PageLoading',
-    loading: '@/components/Basic/Loading',
+    loading: '@ant-design/pro-layout/es/PageLoading',
+    // loading: '@/components/Basic/Loading',
   },
   targets: {
     ie: 11,

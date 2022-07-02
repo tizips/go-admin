@@ -1,7 +1,7 @@
-declare namespace APIBasicBuilding {
+declare namespace APIDormitoryBasicBuilding {
   type Props = {
     visible?: boolean;
-    params?: APIBasicBuildings.Data;
+    params?: APIDormitoryBasicBuildings.Data;
     onCreate?: () => void;
     onUpdate?: () => void;
     onSave?: () => void;

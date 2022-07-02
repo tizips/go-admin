@@ -1,4 +1,4 @@
-declare namespace APIAssetGrants {
+declare namespace APIDormitoryAssetGrants {
   type Data = {
     id?: number;
     package?: string;

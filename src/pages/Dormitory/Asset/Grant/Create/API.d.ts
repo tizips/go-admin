@@ -1,7 +1,7 @@
-declare namespace APIAssetGrant {
+declare namespace APIDormitoryAssetGrant {
   type Props = {
     visible?: boolean;
-    params?: APIAssetGrants.Data;
+    params?: APIDormitoryAssetGrants.Data;
     onCreate?: () => void;
     onUpdate?: () => void;
     onSave?: () => void;

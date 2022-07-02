@@ -1,7 +1,7 @@
-declare namespace APIAssetPackage {
+declare namespace APIDormitoryAssetPackage {
   type Props = {
     visible?: boolean;
-    params?: APIAssetPackages.Data;
+    params?: APIDormitoryAssetPackages.Data;
     onCreate?: () => void;
     onUpdate?: () => void;
     onSave?: () => void;

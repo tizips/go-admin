@@ -1,34 +1,34 @@
-declare namespace APIAuthRole {
-  export type Props = {
+declare namespace APISiteAuthRole {
+  type Props = {
     visible?: boolean;
-    params?: APIAuthRoles.Data;
+    params?: APISiteAuthRoles.Data;
     onCreate?: () => void;
     onUpdate?: () => void;
     onSave?: () => void;
     onCancel?: () => void;
-  }
+  };
 
-  export type Editor = {
+  type Editor = {
     name?: string;
     summary?: string;
     permissions?: number[];
-  }
+  };
 
-  export type Former = {
+  type Former = {
     name?: string;
     summary?: string;
     permissions?: any[];
-  }
+  };
 
-  export type Permission = {
+  type Permission = {
     id?: number;
     name?: string;
     slug?: string;
     children?: Permission;
-  }
+  };
 
-  export type Loading = {
+  type Loading = {
     confirmed?: boolean;
     permission?: boolean;
-  }
+  };
 }

@@ -1,7 +1,7 @@
-declare namespace APIAssetCategory {
+declare namespace APIDormitoryAssetCategory {
   type Props = {
     visible?: boolean;
-    params?: APIAssetCategories.Data;
+    params?: APIDormitoryAssetCategories.Data;
     onCreate?: () => void;
     onUpdate?: () => void;
     onSave?: () => void;

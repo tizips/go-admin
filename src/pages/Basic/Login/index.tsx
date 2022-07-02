@@ -11,9 +11,8 @@ import bgImage from '@/static/img/background-login.jpg';
 import styles from './index.less';
 
 const Login: React.FC = () => {
-  const initBasicFormer: APILogin.Login = {};
-
   const { initialState, setInitialState } = useModel('@@initialState');
+
   const [errors, setErrors] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -68,7 +67,7 @@ const Login: React.FC = () => {
                   )}
                 </Col>
                 <Col xs={24}>
-                  <Form initialValues={initBasicFormer} onFinish={onSubmit} labelCol={{ span: 0 }}>
+                  <Form onFinish={onSubmit} labelCol={{ span: 0 }}>
                     <Form.Item
                       name="username"
                       validateFirst

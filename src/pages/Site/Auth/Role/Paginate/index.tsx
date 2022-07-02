@@ -9,17 +9,17 @@ import Loop from '@/utils/Loop';
 import Authorize from '@/components/Basic/Authorize';
 
 const Paginate: React.FC = () => {
-  const [search, setSearch] = useState<APIAuthRoles.Search>({});
-  const [editor, setEditor] = useState<APIAuthRoles.Data | undefined>();
+  const [search, setSearch] = useState<APISiteAuthRoles.Search>({});
+  const [editor, setEditor] = useState<APISiteAuthRoles.Data | undefined>();
   const [loadingPaginate, setLoadingPaginate] = useState(false);
-  const [visible, setVisible] = useState<APIAuthRoles.Visible>({});
-  const [data, setData] = useState<APIAuthRoles.Data[]>();
+  const [visible, setVisible] = useState<APISiteAuthRoles.Visible>({});
+  const [data, setData] = useState<APISiteAuthRoles.Data[]>();
   const [paginate, setPaginate] = useState<APIData.Paginate>({});
 
   const toPaginate = () => {
     setLoadingPaginate(true);
     doPaginate(search)
-      .then((response: APIResponse.Paginate<APIAuthRoles.Data[]>) => {
+      .then((response: APIResponse.Paginate<APISiteAuthRoles.Data[]>) => {
         if (response.code === Constants.Success) {
           setPaginate({
             size: response.data.size,
@@ -32,9 +32,9 @@ const Paginate: React.FC = () => {
       .finally(() => setLoadingPaginate(false));
   };
 
-  const onDelete = (record: APIAuthRoles.Data) => {
+  const onDelete = (record: APISiteAuthRoles.Data) => {
     if (data) {
-      const temp: APIAuthRoles.Data[] = [...data];
+      const temp: APISiteAuthRoles.Data[] = [...data];
       Loop.ById(temp, record.id, (item) => (item.loading_deleted = true));
       setData(temp);
     }
@@ -62,7 +62,7 @@ const Paginate: React.FC = () => {
     setVisible({ ...visible, editor: true });
   };
 
-  const onUpdate = (record: APIAuthRoles.Data) => {
+  const onUpdate = (record: APISiteAuthRoles.Data) => {
     setEditor(record);
     setVisible({ ...visible, editor: true });
   };
@@ -121,7 +121,7 @@ const Paginate: React.FC = () => {
           <Table.Column title="简介" dataIndex="summary" />
           <Table.Column
             title="创建时间"
-            render={(record: APIAuthRoles.Data) =>
+            render={(record: APISiteAuthRoles.Data) =>
               record.created_at && moment(record.created_at).format('YYYY/MM/DD')
             }
           />
@@ -129,7 +129,7 @@ const Paginate: React.FC = () => {
             title="操作"
             align="center"
             width={100}
-            render={(record: APIAuthRoles.Data) => (
+            render={(record: APISiteAuthRoles.Data) => (
               <>
                 <Authorize permission="site.auth.role.update">
                   <Button type="link" onClick={() => onUpdate(record)}>

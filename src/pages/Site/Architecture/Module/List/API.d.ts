@@ -1,4 +1,4 @@
-declare namespace APIArchitectureModules {
+declare namespace APISiteArchitectureModules {
   export type Data = {
     id: number;
     slug?: string;

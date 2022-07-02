@@ -14,7 +14,7 @@ import {
 import Constants from '@/utils/Constants';
 import moment from 'moment';
 import { FormOutlined, RedoOutlined } from '@ant-design/icons';
-import { useModel } from '@@/plugin-model/useModel';
+import { useModel } from 'umi';
 import Editor from '@/pages/Dormitory/Basic/Building/Editor';
 import { doDelete, doEnable, doList } from './service';
 import Loop from '@/utils/Loop';
@@ -24,23 +24,23 @@ import Enable from '@/components/Basic/Enable';
 const List: React.FC = () => {
   const { initialState } = useModel('@@initialState');
 
-  const [editor, setEditor] = useState<APIBasicBuildings.Data | undefined>();
+  const [editor, setEditor] = useState<APIDormitoryBasicBuildings.Data | undefined>();
   const [loading, setLoading] = useState(false);
-  const [visible, setVisible] = useState<APIBasicBuildings.Visible>({});
-  const [data, setData] = useState<APIBasicBuildings.Data[]>();
+  const [visible, setVisible] = useState<APIDormitoryBasicBuildings.Visible>({});
+  const [data, setData] = useState<APIDormitoryBasicBuildings.Data[]>();
 
   const toList = () => {
     setLoading(true);
     doList()
-      .then((response: APIResponse.Response<APIBasicBuildings.Data[]>) => {
+      .then((response: APIResponse.Response<APIDormitoryBasicBuildings.Data[]>) => {
         if (response.code === Constants.Success) setData(response.data || []);
       })
       .finally(() => setLoading(false));
   };
 
-  const onDelete = (record: APIBasicBuildings.Data) => {
+  const onDelete = (record: APIDormitoryBasicBuildings.Data) => {
     if (data) {
-      const temp: APIBasicBuildings.Data[] = [...data];
+      const temp: APIDormitoryBasicBuildings.Data[] = [...data];
       Loop.ById(temp, record.id, (item) => (item.loading_deleted = true));
       setData(temp);
     }
@@ -56,7 +56,7 @@ const List: React.FC = () => {
       })
       .finally(() => {
         if (data) {
-          const temp: APIBasicBuildings.Data[] = [...data];
+          const temp: APIDormitoryBasicBuildings.Data[] = [...data];
           Loop.ById(temp, record.id, (item) => (item.loading_deleted = false));
           setData(temp);
         }
@@ -68,7 +68,7 @@ const List: React.FC = () => {
     setVisible({ ...visible, editor: true });
   };
 
-  const onUpdate = (record: APIBasicBuildings.Data) => {
+  const onUpdate = (record: APIDormitoryBasicBuildings.Data) => {
     setEditor(record);
     setVisible({ ...visible, editor: true });
   };
@@ -82,9 +82,9 @@ const List: React.FC = () => {
     setVisible({ ...visible, editor: false });
   };
 
-  const onEnable = (record: APIBasicBuildings.Data) => {
+  const onEnable = (record: APIDormitoryBasicBuildings.Data) => {
     if (data) {
-      const temp: APIBasicBuildings.Data[] = [...data];
+      const temp: APIDormitoryBasicBuildings.Data[] = [...data];
       Loop.ById(temp, record.id, (item) => (item.loading_enable = true));
       setData(temp);
     }
@@ -145,7 +145,7 @@ const List: React.FC = () => {
           <Table.Column
             title="公共区域"
             align="center"
-            render={(record: APIBasicRooms.Data) => (
+            render={(record: APIDormitoryBasicRooms.Data) => (
               <Tag color={record.is_public === 1 ? '#87d068' : '#f50'}>
                 {record.is_public === 1 ? '是' : '否'}
               </Tag>
@@ -154,14 +154,14 @@ const List: React.FC = () => {
           <Table.Column
             title="序号"
             align="center"
-            render={(record: APIBasicBuildings.Data) => (
+            render={(record: APIDormitoryBasicBuildings.Data) => (
               <Tag color={initialState?.settings?.primaryColor}>{record.order}</Tag>
             )}
           />
           <Table.Column
             title="启用"
             align="center"
-            render={(record: APIBasicBuildings.Data) => (
+            render={(record: APIDormitoryBasicBuildings.Data) => (
               <Authorize
                 permission="dormitory.basic.building.enable"
                 fallback={<Enable is_enable={record.is_enable} />}
@@ -177,14 +177,14 @@ const List: React.FC = () => {
           />
           <Table.Column
             title="创建时间"
-            render={(record: APIBasicBuildings.Data) =>
+            render={(record: APIDormitoryBasicBuildings.Data) =>
               record.created_at && moment(record.created_at).format('YYYY/MM/DD')
             }
           />
           <Table.Column
             align="center"
             width={100}
-            render={(record: APIBasicBuildings.Data) => (
+            render={(record: APIDormitoryBasicBuildings.Data) => (
               <>
                 <Authorize permission="dormitory.basic.building.update">
                   <Button type="link" onClick={() => onUpdate(record)}>

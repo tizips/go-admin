@@ -3,16 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { doCreate, doUpdate } from './service';
 import Constants from '@/utils/Constants';
 
-const Editor: React.FC<APIBasicFloor.Props> = (props) => {
-  const init: APIBasicFloor.Former = {
-    name: '',
-    order: 50,
-    is_enable: 1,
-    is_public: 2,
-  };
-
-  const [former] = Form.useForm();
-  const [loading, setLoading] = useState<APIBasicFloor.Loading>({});
+const Editor: React.FC<APIDormitoryBasicFloor.Props> = (props) => {
+  const [former] = Form.useForm<APIDormitoryBasicFloor.Former>();
+  const [loading, setLoading] = useState<APIDormitoryBasicFloor.Loading>({});
 
   const toCreate = (params: any) => {
     setLoading({ ...loading, confirmed: true });
@@ -45,8 +38,8 @@ const Editor: React.FC<APIBasicFloor.Props> = (props) => {
       .finally(() => setLoading({ ...loading, confirmed: false }));
   };
 
-  const onSubmit = (values: APIBasicFloor.Former) => {
-    const params: APIBasicFloor.Editor = {
+  const onSubmit = (values: APIDormitoryBasicFloor.Former) => {
+    const params: APIDormitoryBasicFloor.Editor = {
       name: values.name,
       building: values.building,
       order: values.order,
@@ -59,7 +52,12 @@ const Editor: React.FC<APIBasicFloor.Props> = (props) => {
   };
 
   const toInit = () => {
-    const data = init;
+    const data: APIDormitoryBasicFloor.Former = {
+      name: '',
+      order: 50,
+      is_enable: 1,
+      is_public: 2,
+    };
 
     if (typeof props.building == 'string') data.building = parseInt(props.building, 10);
     else if (typeof props.building == 'number') data.building = props.building;
@@ -88,7 +86,7 @@ const Editor: React.FC<APIBasicFloor.Props> = (props) => {
       onCancel={props.onCancel}
       confirmLoading={loading.confirmed}
     >
-      <Form form={former} initialValues={init} onFinish={onSubmit}>
+      <Form form={former} onFinish={onSubmit}>
         <Form.Item label="名称" name="name" rules={[{ required: true }, { max: 20 }]}>
           <Input />
         </Form.Item>

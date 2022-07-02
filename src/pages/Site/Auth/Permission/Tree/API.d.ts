@@ -1,5 +1,5 @@
-declare namespace APIAuthPermissions {
-  export type Data = {
+declare namespace APISiteAuthPermissions {
+  type Data = {
     id?: number;
     parents?: number[];
     name?: string;
@@ -11,7 +11,7 @@ declare namespace APIAuthPermissions {
     loading_deleted?: boolean;
   };
 
-  export type Visible = {
+  type Visible = {
     editor?: boolean;
   };
 

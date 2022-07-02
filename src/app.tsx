@@ -7,11 +7,10 @@ import RightContent from '@/components/Basic/RightContent';
 import Footer from '@/components/Basic/Footer';
 import { doAccount } from '@/services/account';
 import Constants from '@/utils/Constants';
-import { notification } from 'antd';
+import { notification, Spin } from 'antd';
 import defaultSettings from '../config/defaultSettings';
 import Header from '@/components/Basic/Header';
-
-const loginPath = '/login';
+import { LoadingOutlined } from '@ant-design/icons';
 
 /** 获取用户信息比较慢的时候会展示一个 loading */
 export const initialStateConfig = {
@@ -29,17 +28,19 @@ export async function getInitialState(): Promise<{
   permissions?: string[];
   toAccount?: () => Promise<any>;
 }> {
+  Spin.setDefaultIndicator(<LoadingOutlined />);
+
   const toAccount = async () => {
     try {
       const response = await doAccount();
       if (response.code === Constants.Success) return response.data;
     } catch (error) {
-      history.push(loginPath);
+      history.push(Constants.PathLogin);
     }
     return undefined;
   };
   // 如果是登录页面，不执行
-  if (history.location.pathname !== loginPath) {
+  if (history.location.pathname !== Constants.PathLogin) {
     const account = await toAccount();
     return {
       toAccount,
@@ -56,8 +57,8 @@ export async function getInitialState(): Promise<{
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
 export const layout: RunTimeLayoutConfig = ({ initialState }) => {
   return {
-    headerContentRender: () => initialState?.account ? <Header /> : <></>,
-    rightContentRender: () => initialState?.account ? <RightContent /> : <></>,
+    headerContentRender: () => (initialState?.account ? <Header /> : <></>),
+    rightContentRender: () => (initialState?.account ? <RightContent /> : <></>),
     disableContentMargin: false,
     waterMarkProps: {
       content: initialState?.account?.nickname,
@@ -66,8 +67,8 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
     onPageChange: () => {
       const { location } = history;
       // 如果没有登录，重定向到 login
-      if (!initialState?.account && location.pathname !== loginPath) {
-        history.push(loginPath);
+      if (!initialState?.account && location.pathname !== Constants.PathLogin) {
+        history.push(Constants.PathLogin);
       }
     },
     menuHeaderRender: undefined,
@@ -106,8 +107,8 @@ const errorHandler = (error: ResponseError) => {
    * 未登录，跳转登录页面
    */
   if (response.status === 401) {
-    // if (localStorage.getItem(Constants.Authorization)) localStorage.clear();
-    // window.location.href = '/login';
+    if (localStorage.getItem(Constants.Authorization)) localStorage.clear();
+    history.push(Constants.PathLogin);
   } else if (response.status === 403) {
     history.push('/403');
     return response;
@@ -150,7 +151,8 @@ const authHeaderInterceptor = (url: string, options: RequestOptionsInit) => {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const RefreshResponse = (response: Response, options: RequestOptionsInit) => {
   const token = response.headers.get(Constants.Authorization);
-  if (token && token != localStorage.getItem(Constants.Authorization)) localStorage.setItem(Constants.Authorization, token);
+  if (token && token != localStorage.getItem(Constants.Authorization))
+    localStorage.setItem(Constants.Authorization, token);
   return response;
 };
 

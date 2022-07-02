@@ -17,7 +17,7 @@ import {
 import Constants from '@/utils/Constants';
 import moment from 'moment';
 import { FormOutlined, RedoOutlined } from '@ant-design/icons';
-import { useModel } from '@@/plugin-model/useModel';
+import { useModel } from 'umi';
 import Editor from '@/pages/Dormitory/Basic/Bed/Editor';
 import { doDelete, doEnable, doPaginate } from './service';
 import { doBuildingByOnline, doFloorByOnline } from '@/services/dormitory';
@@ -28,18 +28,18 @@ import Enable from '@/components/Basic/Enable';
 const Paginate: React.FC = () => {
   const { initialState } = useModel('@@initialState');
 
-  const [search, setSearch] = useState<APIBasicBeds.Search>({});
-  const [editor, setEditor] = useState<APIBasicBeds.Data | undefined>();
+  const [search, setSearch] = useState<APIDormitoryBasicBeds.Search>({});
+  const [editor, setEditor] = useState<APIDormitoryBasicBeds.Data | undefined>();
   const [loadingPaginate, setLoadingPaginate] = useState(false);
-  const [visible, setVisible] = useState<APIBasicBeds.Visible>({});
-  const [buildings, setBuildings] = useState<APIResponse.Online[]>([]);
+  const [visible, setVisible] = useState<APIDormitoryBasicBeds.Visible>({});
+  const [buildings, setBuildings] = useState<APIData.Online[]>([]);
   const [positions, setPositions] = useState<APIData.Tree[]>([]);
-  const [data, setData] = useState<APIBasicBeds.Data[]>();
+  const [data, setData] = useState<APIDormitoryBasicBeds.Data[]>();
   const [paginate, setPaginate] = useState<APIData.Paginate>({});
 
   const toBuildingsByOnline = () => {
     doBuildingByOnline({ is_public: 2 }).then(
-      (response: APIResponse.Response<APIResponse.Online[]>) => {
+      (response: APIResponse.Response<APIData.Online[]>) => {
         if (response.code == Constants.Success) {
           setBuildings(response.data || []);
         }
@@ -49,7 +49,7 @@ const Paginate: React.FC = () => {
 
   const toFloorsByOnline = (id?: number) => {
     doFloorByOnline(id, { is_public: 2 }).then(
-      (response: APIResponse.Response<APIResponse.Online[]>) => {
+      (response: APIResponse.Response<APIData.Online[]>) => {
         const temp = [...positions];
         Loop.ById(
           temp,
@@ -72,7 +72,7 @@ const Paginate: React.FC = () => {
   const toPaginate = () => {
     setLoadingPaginate(true);
     doPaginate(search)
-      .then((response: APIResponse.Paginate<APIBasicBeds.Data[]>) => {
+      .then((response: APIResponse.Paginate<APIDormitoryBasicBeds.Data[]>) => {
         if (response.code === Constants.Success) {
           setPaginate({
             page: response.data.page,
@@ -85,9 +85,9 @@ const Paginate: React.FC = () => {
       .finally(() => setLoadingPaginate(false));
   };
 
-  const onDelete = (record: APIBasicBeds.Data) => {
+  const onDelete = (record: APIDormitoryBasicBeds.Data) => {
     if (data) {
-      const temp: APIBasicBeds.Data[] = [...data];
+      const temp: APIDormitoryBasicBeds.Data[] = [...data];
       Loop.ById(temp, record.id, (item) => (item.loading_deleted = true));
       setData(temp);
     }
@@ -103,7 +103,7 @@ const Paginate: React.FC = () => {
       })
       .finally(() => {
         if (data) {
-          const temp: APIBasicBeds.Data[] = [...data];
+          const temp: APIDormitoryBasicBeds.Data[] = [...data];
           Loop.ById(temp, record.id, (item) => (item.loading_deleted = false));
           setData(temp);
         }
@@ -115,7 +115,7 @@ const Paginate: React.FC = () => {
     setVisible({ ...visible, editor: true });
   };
 
-  const onUpdate = (record: APIBasicBeds.Data) => {
+  const onUpdate = (record: APIDormitoryBasicBeds.Data) => {
     setEditor(record);
     setVisible({ ...visible, editor: true });
   };
@@ -129,9 +129,9 @@ const Paginate: React.FC = () => {
     setVisible({ ...visible, editor: false });
   };
 
-  const onEnable = (record: APIBasicBeds.Data) => {
+  const onEnable = (record: APIDormitoryBasicBeds.Data) => {
     if (data) {
-      const temp: APIBasicBeds.Data[] = [...data];
+      const temp: APIDormitoryBasicBeds.Data[] = [...data];
       Loop.ById(temp, record.id, (item) => (item.loading_enable = true));
       setData(temp);
     }
@@ -267,7 +267,7 @@ const Paginate: React.FC = () => {
           <Table.Column
             title="公共区域"
             align="center"
-            render={(record: APIBasicRooms.Data) => (
+            render={(record: APIDormitoryBasicRooms.Data) => (
               <Tag color={record.is_public === 1 ? '#87d068' : '#f50'}>
                 {record.is_public === 1 ? '是' : '否'}
               </Tag>
@@ -276,14 +276,14 @@ const Paginate: React.FC = () => {
           <Table.Column
             title="序号"
             align="center"
-            render={(record: APIBasicBeds.Data) => (
+            render={(record: APIDormitoryBasicBeds.Data) => (
               <Tag color={initialState?.settings?.primaryColor}>{record.order}</Tag>
             )}
           />
           <Table.Column
             title="启用"
             align="center"
-            render={(record: APIBasicBeds.Data) => (
+            render={(record: APIDormitoryBasicBeds.Data) => (
               <Authorize
                 permission="dormitory.basic.bed.enable"
                 fallback={<Enable is_enable={record.is_enable} />}
@@ -300,14 +300,14 @@ const Paginate: React.FC = () => {
           <Table.Column
             title="创建时间"
             align="center"
-            render={(record: APIBasicBeds.Data) =>
+            render={(record: APIDormitoryBasicBeds.Data) =>
               record.created_at && moment(record.created_at).format('YYYY/MM/DD')
             }
           />
           <Table.Column
             align="center"
             width={100}
-            render={(record: APIBasicBeds.Data) => (
+            render={(record: APIDormitoryBasicBeds.Data) => (
               <>
                 <Authorize permission="dormitory.basic.room.update">
                   <Button type="link" onClick={() => onUpdate(record)}>

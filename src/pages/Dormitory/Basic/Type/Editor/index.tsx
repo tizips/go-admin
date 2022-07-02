@@ -4,16 +4,9 @@ import { doCreate, doUpdate } from './service';
 import Constants from '@/utils/Constants';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 
-const Editor: React.FC<APIBasicType.Props> = (props) => {
-  const init: APIBasicType.Former = {
-    name: '',
-    order: 50,
-    beds: undefined,
-    is_enable: 1,
-  };
-
-  const [former] = Form.useForm();
-  const [loading, setLoading] = useState<APIBasicType.Loading>({});
+const Editor: React.FC<APIDormitoryBasicType.Props> = (props) => {
+  const [former] = Form.useForm<APIDormitoryBasicType.Former>();
+  const [loading, setLoading] = useState<APIDormitoryBasicType.Loading>({});
 
   const toCreate = (params: any) => {
     setLoading({ ...loading, confirmed: true });
@@ -46,8 +39,8 @@ const Editor: React.FC<APIBasicType.Props> = (props) => {
       .finally(() => setLoading({ ...loading, confirmed: false }));
   };
 
-  const onSubmit = (values: APIBasicType.Former) => {
-    const params: APIBasicType.Editor = {
+  const onSubmit = (values: APIDormitoryBasicType.Former) => {
+    const params: APIDormitoryBasicType.Editor = {
       name: values.name,
       beds: values.beds,
       order: values.order,
@@ -59,7 +52,12 @@ const Editor: React.FC<APIBasicType.Props> = (props) => {
   };
 
   const toInit = () => {
-    const data = init;
+    const data: APIDormitoryBasicType.Former = {
+      name: '',
+      order: 50,
+      beds: undefined,
+      is_enable: 1,
+    };
 
     if (props.params) {
       data.name = props.params.name;
@@ -102,7 +100,7 @@ const Editor: React.FC<APIBasicType.Props> = (props) => {
       onCancel={props.onCancel}
       confirmLoading={loading.confirmed}
     >
-      <Form form={former} initialValues={init} onFinish={onSubmit} {...formItemLayout}>
+      <Form form={former} onFinish={onSubmit} {...formItemLayout}>
         <Form.Item label="名称" name="name" rules={[{ required: true }, { max: 20 }]}>
           <Input />
         </Form.Item>

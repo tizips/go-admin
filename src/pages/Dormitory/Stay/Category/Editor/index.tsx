@@ -3,16 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { doCreate, doUpdate } from './service';
 import Constants from '@/utils/Constants';
 
-const Editor: React.FC<APIStayCategory.Props> = (props) => {
-  const init: APIStayCategory.Former = {
-    name: '',
-    order: 50,
-    is_temp: 2,
-    is_enable: 1,
-  };
-
-  const [former] = Form.useForm();
-  const [loading, setLoading] = useState<APIStayCategory.Loading>({});
+const Editor: React.FC<APIDormitoryStayCategory.Props> = (props) => {
+  const [former] = Form.useForm<APIDormitoryStayCategory.Former>();
+  const [loading, setLoading] = useState<APIDormitoryStayCategory.Loading>({});
 
   const toCreate = (params: any) => {
     setLoading({ ...loading, confirmed: true });
@@ -45,8 +38,8 @@ const Editor: React.FC<APIStayCategory.Props> = (props) => {
       .finally(() => setLoading({ ...loading, confirmed: false }));
   };
 
-  const onSubmit = (values: APIStayCategory.Former) => {
-    const params: APIStayCategory.Editor = {
+  const onSubmit = (values: APIDormitoryStayCategory.Former) => {
+    const params: APIDormitoryStayCategory.Editor = {
       name: values.name,
       order: values.order,
       is_temp: values.is_temp,
@@ -58,7 +51,12 @@ const Editor: React.FC<APIStayCategory.Props> = (props) => {
   };
 
   const toInit = () => {
-    const data = init;
+    const data: APIDormitoryStayCategory.Former = {
+      name: '',
+      order: 50,
+      is_temp: 2,
+      is_enable: 1,
+    };
 
     if (props.params) {
       data.name = props.params.name;
@@ -84,22 +82,20 @@ const Editor: React.FC<APIStayCategory.Props> = (props) => {
       onCancel={props.onCancel}
       confirmLoading={loading.confirmed}
     >
-      <Form form={former} initialValues={init} onFinish={onSubmit}>
+      <Form form={former} onFinish={onSubmit}>
         <Form.Item label="名称" name="name" rules={[{ required: true }, { max: 20 }]}>
           <Input />
         </Form.Item>
         <Form.Item label="排序" name="order" rules={[{ required: true }, { type: 'number' }]}>
           <Slider min={1} max={99} />
         </Form.Item>
-        {!props.params ? (
+        {!props.params && (
           <Form.Item label="临时" name="is_temp" rules={[{ required: true }]}>
             <Select>
               <Select.Option value={1}>是</Select.Option>
               <Select.Option value={2}>否</Select.Option>
             </Select>
           </Form.Item>
-        ) : (
-          <></>
         )}
         <Form.Item label="启用" name="is_enable" rules={[{ required: true }]}>
           <Select>

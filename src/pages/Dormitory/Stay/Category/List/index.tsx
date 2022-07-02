@@ -14,7 +14,7 @@ import {
 import Constants from '@/utils/Constants';
 import moment from 'moment';
 import { FormOutlined, RedoOutlined } from '@ant-design/icons';
-import { useModel } from '@@/plugin-model/useModel';
+import { useModel } from 'umi';
 import Editor from '@/pages/Dormitory/Stay/Category/Editor';
 import { doDelete, doEnable, doList } from './service';
 import Loop from '@/utils/Loop';
@@ -24,23 +24,23 @@ import Enable from '@/components/Basic/Enable';
 const List: React.FC = () => {
   const { initialState } = useModel('@@initialState');
 
-  const [editor, setEditor] = useState<APIStayCategories.Data | undefined>();
+  const [editor, setEditor] = useState<APIDormitoryStayCategories.Data | undefined>();
   const [loading, setLoading] = useState(false);
-  const [visible, setVisible] = useState<APIStayCategories.Visible>({});
-  const [data, setData] = useState<APIStayCategories.Data[]>();
+  const [visible, setVisible] = useState<APIDormitoryStayCategories.Visible>({});
+  const [data, setData] = useState<APIDormitoryStayCategories.Data[]>();
 
   const toPaginate = () => {
     setLoading(true);
     doList()
-      .then((response: APIResponse.Response<APIStayCategories.Data[]>) => {
+      .then((response: APIResponse.Response<APIDormitoryStayCategories.Data[]>) => {
         if (response.code === Constants.Success) setData(response.data || []);
       })
       .finally(() => setLoading(false));
   };
 
-  const onDelete = (record: APIStayCategories.Data) => {
+  const onDelete = (record: APIDormitoryStayCategories.Data) => {
     if (data) {
-      const temp: APIStayCategories.Data[] = [...data];
+      const temp: APIDormitoryStayCategories.Data[] = [...data];
       Loop.ById(temp, record.id, (item) => (item.loading_deleted = true));
       setData(temp);
     }
@@ -56,7 +56,7 @@ const List: React.FC = () => {
       })
       .finally(() => {
         if (data) {
-          const temp: APIStayCategories.Data[] = [...data];
+          const temp: APIDormitoryStayCategories.Data[] = [...data];
           Loop.ById(temp, record.id, (item) => (item.loading_deleted = false));
           setData(temp);
         }
@@ -68,7 +68,7 @@ const List: React.FC = () => {
     setVisible({ ...visible, editor: true });
   };
 
-  const onUpdate = (record: APIStayCategories.Data) => {
+  const onUpdate = (record: APIDormitoryStayCategories.Data) => {
     setEditor(record);
     setVisible({ ...visible, editor: true });
   };
@@ -82,9 +82,9 @@ const List: React.FC = () => {
     setVisible({ ...visible, editor: false });
   };
 
-  const onEnable = (record: APIStayCategories.Data) => {
+  const onEnable = (record: APIDormitoryStayCategories.Data) => {
     if (data) {
-      const temp: APIStayCategories.Data[] = [...data];
+      const temp: APIDormitoryStayCategories.Data[] = [...data];
       Loop.ById(temp, record.id, (item) => (item.loading_enable = true));
       setData(temp);
     }
@@ -149,20 +149,20 @@ const List: React.FC = () => {
           <Table.Column title="名称" dataIndex="name" />
           <Table.Column
             title="入住"
-            render={(record: APIStayCategories.Data) =>
+            render={(record: APIDormitoryStayCategories.Data) =>
               record.is_temp === 1 ? '临时入住' : '正式入住'
             }
           />
           <Table.Column
             title="序号"
-            render={(record: APIStayCategories.Data) => (
+            render={(record: APIDormitoryStayCategories.Data) => (
               <Tag color={initialState?.settings?.primaryColor}>{record.order}</Tag>
             )}
           />
           <Table.Column
             title="启用"
             align="center"
-            render={(record: APIStayCategories.Data) => (
+            render={(record: APIDormitoryStayCategories.Data) => (
               <Authorize
                 permission="dormitory.stay.category.enable"
                 fallback={<Enable is_enable={record.is_enable} />}
@@ -178,14 +178,14 @@ const List: React.FC = () => {
           />
           <Table.Column
             title="创建时间"
-            render={(record: APIStayCategories.Data) =>
+            render={(record: APIDormitoryStayCategories.Data) =>
               record.created_at && moment(record.created_at).format('YYYY/MM/DD')
             }
           />
           <Table.Column
             align="center"
             width={100}
-            render={(record: APIStayCategories.Data) => (
+            render={(record: APIDormitoryStayCategories.Data) => (
               <>
                 <Authorize permission="dormitory.stay.category.update">
                   <Button type="link" onClick={() => onUpdate(record)}>

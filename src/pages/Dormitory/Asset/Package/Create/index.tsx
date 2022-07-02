@@ -7,20 +7,15 @@ import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import Loop from '@/utils/Loop';
 import Pattern from '@/utils/Pattern';
 
-const Create: React.FC<APIAssetPackage.Props> = (props) => {
-  const init: APIAssetPackage.Former = {
-    name: '',
-    devices: [{}],
-  };
-
-  const [former] = Form.useForm();
-  const [loading, setLoading] = useState<APIAssetPackage.Loading>({});
+const Create: React.FC<APIDormitoryAssetPackage.Props> = (props) => {
+  const [former] = Form.useForm<APIDormitoryAssetPackage.Former>();
+  const [loading, setLoading] = useState<APIDormitoryAssetPackage.Loading>({});
   const [devices, setDevices] = useState<APIData.Tree[]>([]);
 
   const toCategoriesByOnline = () => {
     setLoading({ ...loading, category: true });
     doAssetCategoryByOnline()
-      .then((response: APIResponse.Response<APIResponse.Online[]>) => {
+      .then((response: APIResponse.Response<APIData.Online[]>) => {
         if (response.code == Constants.Success) {
           const data: APIData.Tree[] = [];
           if (response.data)
@@ -68,8 +63,8 @@ const Create: React.FC<APIAssetPackage.Props> = (props) => {
       .finally(() => setLoading({ ...loading, confirmed: false }));
   };
 
-  const onSubmit = (values: APIAssetPackage.Former) => {
-    const params: APIAssetPackage.Editor = {
+  const onSubmit = (values: APIDormitoryAssetPackage.Former) => {
+    const params: APIDormitoryAssetPackage.Editor = {
       name: values.name,
       devices: [],
     };
@@ -90,7 +85,7 @@ const Create: React.FC<APIAssetPackage.Props> = (props) => {
   };
 
   const toChildren = (id?: number) => {
-    doAssetDeviceByOnline(id).then((response: APIResponse.Response<APIResponse.Online[]>) => {
+    doAssetDeviceByOnline(id).then((response: APIResponse.Response<APIData.Online[]>) => {
       const data = [...devices];
       if (response.code == Constants.Success) {
         Loop.ById(data, id, (item: APIData.Tree) => (item.children = response.data), 'category');
@@ -99,12 +94,12 @@ const Create: React.FC<APIAssetPackage.Props> = (props) => {
     });
   };
 
-  const onChildren = (values: APIAssetPackage.Devices[]) => {
+  const onChildren = (values: APIDormitoryAssetPackage.Devices[]) => {
     const value = values[values.length - 1];
 
     if (value.children == undefined) {
       const data = [...devices];
-      Loop.ById(data, value.id, (item: APIAssetPackage.Devices) => {
+      Loop.ById(data, value.id, (item: APIDormitoryAssetPackage.Devices) => {
         item.loading = true;
       });
       setDevices(data);
@@ -114,7 +109,10 @@ const Create: React.FC<APIAssetPackage.Props> = (props) => {
   };
 
   const toInit = () => {
-    const data = init;
+    const data: APIDormitoryAssetPackage.Former = {
+      name: '',
+      devices: [{}],
+    };
 
     if (props.params) {
       data.name = props.params.name;
@@ -169,7 +167,7 @@ const Create: React.FC<APIAssetPackage.Props> = (props) => {
       onCancel={props.onCancel}
       confirmLoading={loading.confirmed}
     >
-      <Form form={former} initialValues={init} onFinish={onSubmit}>
+      <Form form={former} onFinish={onSubmit}>
         <Form.Item name="name" rules={[{ required: true, message: '请输入名称' }]}>
           <Input placeholder="请输入打包名称" />
         </Form.Item>

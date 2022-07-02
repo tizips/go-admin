@@ -13,27 +13,17 @@ import Loop from '@/utils/Loop';
 
 import styles from './index.less';
 
-const Create: React.FC<APIStayPeople.Props> = (props) => {
-  const init: APIStayPeople.Former = {
-    positions: undefined,
-    is_temp: 2,
-    category: undefined,
-    name: '',
-    mobile: '',
-    date: moment(),
-    remark: '',
-  };
-
-  const [former] = Form.useForm();
-  const [loading, setLoading] = useState<APIStayPeople.Loading>({});
+const Create: React.FC<APIDormitoryStayPeople.Props> = (props) => {
+  const [former] = Form.useForm<APIDormitoryStayPeople.Former>();
+  const [loading, setLoading] = useState<APIDormitoryStayPeople.Loading>({});
   const [categories, setCategories] = useState<APIDormitory.StayCategory[]>([]);
   const [category, setCategory] = useState<APIDormitory.StayCategory[]>([]);
   const [positions, setPositions] = useState<APIData.Tree[]>([]);
-  const [isTemp, setIsTemp] = useState(init.is_temp);
+  const isTemp = Form.useWatch('is_temp', former);
 
   const toFloorsByOnline = (id?: number) => {
     doFloorByOnline(id, { is_public: 2 }).then(
-      (response: APIResponse.Response<APIResponse.Online[]>) => {
+      (response: APIResponse.Response<APIData.Online[]>) => {
         const data = [...positions];
         Loop.ById(
           data,
@@ -60,7 +50,7 @@ const Create: React.FC<APIStayPeople.Props> = (props) => {
 
   const toRoomsByOnline = (id?: number) => {
     doRoomByOnline(id, { is_public: 2 }).then(
-      (response: APIResponse.Response<APIResponse.Online[]>) => {
+      (response: APIResponse.Response<APIData.Online[]>) => {
         const data = [...positions];
         Loop.ById(
           data,
@@ -86,23 +76,21 @@ const Create: React.FC<APIStayPeople.Props> = (props) => {
   };
 
   const toBedsByOnline = (id?: number) => {
-    doBedByOnline(id, { is_public: 2 }).then(
-      (response: APIResponse.Response<APIResponse.Online[]>) => {
-        const data = [...positions];
-        Loop.ById(
-          data,
-          id,
-          (item: APIData.Tree) => {
-            item.children = [];
-            if (response.code == Constants.Success) {
-              response.data.forEach((value) => item.children?.push(value));
-            }
-          },
-          'room',
-        );
-        if (data !== positions) setPositions(data);
-      },
-    );
+    doBedByOnline(id, { is_public: 2 }).then((response: APIResponse.Response<APIData.Online[]>) => {
+      const data = [...positions];
+      Loop.ById(
+        data,
+        id,
+        (item: APIData.Tree) => {
+          item.children = [];
+          if (response.code == Constants.Success) {
+            response.data.forEach((value) => item.children?.push(value));
+          }
+        },
+        'room',
+      );
+      if (data !== positions) setPositions(data);
+    });
   };
 
   const toCategoriesByOnline = () => {
@@ -129,8 +117,8 @@ const Create: React.FC<APIStayPeople.Props> = (props) => {
       .finally(() => setLoading({ ...loading, confirmed: false }));
   };
 
-  const onSubmit = (values: APIStayPeople.Former) => {
-    const params: APIStayPeople.Editor = {
+  const onSubmit = (values: APIDormitoryStayPeople.Former) => {
+    const params: APIDormitoryStayPeople.Editor = {
       category: values.category,
       name: values.name,
       mobile: values.mobile,
@@ -149,8 +137,7 @@ const Create: React.FC<APIStayPeople.Props> = (props) => {
     toCreate(params);
   };
 
-  const onChangeTemp = (value: number) => {
-    setIsTemp(value);
+  const onChangeTemp = () => {
     former.setFieldsValue({ category: undefined, date: undefined });
   };
 
@@ -164,9 +151,15 @@ const Create: React.FC<APIStayPeople.Props> = (props) => {
   };
 
   const toInit = () => {
-    setIsTemp(init.is_temp);
-
-    former.setFieldsValue(init);
+    former.setFieldsValue({
+      positions: undefined,
+      is_temp: 2,
+      category: undefined,
+      name: '',
+      mobile: '',
+      date: moment(),
+      remark: '',
+    });
   };
 
   useEffect(() => {
@@ -209,7 +202,7 @@ const Create: React.FC<APIStayPeople.Props> = (props) => {
       onCancel={props.onCancel}
       confirmLoading={loading.confirmed}
     >
-      <Form form={former} initialValues={init} onFinish={onSubmit} labelCol={{ span: 5 }}>
+      <Form form={former} onFinish={onSubmit} labelCol={{ span: 5 }}>
         <Row gutter={10}>
           <Col span={24} md={{ span: 12 }}>
             <Form.Item label="位置" name="positions" rules={[{ required: true }]}>

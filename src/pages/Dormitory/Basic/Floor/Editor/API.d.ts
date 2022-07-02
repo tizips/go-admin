@@ -1,9 +1,9 @@
-declare namespace APIBasicFloor {
+declare namespace APIDormitoryBasicFloor {
   type Props = {
     visible?: boolean;
-    params?: APIBasicFloors.Data;
+    params?: APIDormitoryBasicFloors.Data;
     building?: number | string;
-    buildings?: APIResponse.Online[];
+    buildings?: APIData.Online[];
     onCreate?: () => void;
     onUpdate?: () => void;
     onSave?: () => void;

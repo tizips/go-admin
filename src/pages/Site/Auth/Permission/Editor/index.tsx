@@ -4,25 +4,17 @@ import { doCreate, doParents, doUpdate } from './service';
 import Constants from '@/utils/Constants';
 import { doApis } from '@/services/site';
 
-const Editor: React.FC<APIAuthPermission.Props> = (props) => {
-
-  const init: APIAuthPermission.Former = {
-    parent: [],
-    name: '',
-    slug: '',
-    uri: '',
-  };
-
-  const [former] = Form.useForm();
-  const [apis, setApis] = useState<APIAuthPermission.Api[]>([]);
+const Editor: React.FC<APISiteAuthPermission.Props> = (props) => {
+  const [former] = Form.useForm<APISiteAuthPermission.Former>();
+  const [apis, setApis] = useState<APISiteAuthPermission.Api[]>([]);
   const [parents, setParents] = useState<any[]>([]);
-  const [loading, setLoading] = useState<APIAuthPermission.Loading>({});
+  const [loading, setLoading] = useState<APISiteAuthPermission.Loading>({});
   const [parent, setParent] = useState([]);
 
   const toApis = () => {
     setLoading({ ...loading, api: true });
     doApis(props.module)
-      .then((response: APIResponse.Response<APIAuthPermission.Api[]>) => {
+      .then((response: APIResponse.Response<APISiteAuthPermission.Api[]>) => {
         if (response.code === Constants.Success) {
           const data = response.data;
           if (props.params) data.push({ method: props.params.method, path: props.params.path });
@@ -35,7 +27,7 @@ const Editor: React.FC<APIAuthPermission.Props> = (props) => {
   const toParents = () => {
     setLoading({ ...loading, parent: true });
     doParents(props.module)
-      .then((response: APIResponse.Response<APIAuthPermission.Parent[]>) => {
+      .then((response: APIResponse.Response<APISiteAuthPermission.Parent[]>) => {
         if (response.code === Constants.Success) {
           setParents(response.data);
         }
@@ -79,11 +71,10 @@ const Editor: React.FC<APIAuthPermission.Props> = (props) => {
       .finally(() => setLoading({ ...loading, confirmed: false }));
   };
 
-  const onSubmit = (values: APIAuthPermission.Former) => {
-
+  const onSubmit = (values: APISiteAuthPermission.Former) => {
     const uri: string[] | undefined = values.uri?.split('|');
 
-    const params: APIAuthPermission.Editor = {
+    const params: APISiteAuthPermission.Editor = {
       module: props.module,
       parent: values.parent ? values.parent[values.parent?.length - 1] : undefined,
       name: values.name,
@@ -104,13 +95,21 @@ const Editor: React.FC<APIAuthPermission.Props> = (props) => {
   };
 
   const toInit = () => {
-    const data = init;
+    const data: APISiteAuthPermission.Former = {
+      parent: [],
+      name: '',
+      slug: '',
+      uri: '',
+    };
+
     if (props.params) {
       data.parent = props.params.parents;
       data.name = props.params.name;
       data.slug = props.params.slug;
-      if (props.params.method && props.params.path) data.uri = `${props.params.method}|${props.params.path}`;
+      if (props.params.method && props.params.path)
+        data.uri = `${props.params.method}|${props.params.path}`;
     }
+
     former.setFieldsValue(data);
   };
 
@@ -123,29 +122,44 @@ const Editor: React.FC<APIAuthPermission.Props> = (props) => {
   }, [props.visible]);
 
   return (
-    <Modal title={props.params ? '编辑' : '创建'} visible={props.visible} centered onOk={former.submit}
-           maskClosable={false} onCancel={props.onCancel} confirmLoading={loading.confirmed}>
-      <Form form={former} initialValues={init} onFinish={onSubmit} labelCol={{ span: 3 }}>
-        <Form.Item label='父级' name='parent'>
-          <Cascader options={parents} fieldNames={{ label: 'name', value: 'id' }} onChange={onChangeParent}
-                    changeOnSelect disabled={!!props.params?.children} />
+    <Modal
+      title={props.params ? '编辑' : '创建'}
+      visible={props.visible}
+      centered
+      onOk={former.submit}
+      maskClosable={false}
+      onCancel={props.onCancel}
+      confirmLoading={loading.confirmed}
+    >
+      <Form form={former} onFinish={onSubmit} labelCol={{ span: 3 }}>
+        <Form.Item label="父级" name="parent">
+          <Cascader
+            options={parents}
+            fieldNames={{ label: 'name', value: 'id' }}
+            onChange={onChangeParent}
+            changeOnSelect
+            disabled={!!props.params?.children}
+          />
         </Form.Item>
-        <Form.Item label='名称' name='name' rules={[{ required: true }, { max: 20 }]}>
+        <Form.Item label="名称" name="name" rules={[{ required: true }, { max: 20 }]}>
           <Input />
         </Form.Item>
-        <Form.Item label='标示' name='slug' rules={[{ required: true }, { max: 64 }]}>
+        <Form.Item label="标示" name="slug" rules={[{ required: true }, { max: 64 }]}>
           <Input />
         </Form.Item>
-        <Form.Item label='接口' name='uri' rules={[{ required: parent.length >= 2 }]}>
+        <Form.Item label="接口" name="uri" rules={[{ required: parent.length >= 2 }]}>
           <Select loading={loading.api}>
-            {
-              apis.map(item => (
-                <Select.Option key={`${item.method}|${item.path}`} value={`${item.method}|${item.path}`}>
-                  <Tag color={item.method && props.methods ? props.methods[item.method] : ''}>{item.method}</Tag>
-                  {item.path}
-                </Select.Option>
-              ))
-            }
+            {apis.map((item) => (
+              <Select.Option
+                key={`${item.method}|${item.path}`}
+                value={`${item.method}|${item.path}`}
+              >
+                <Tag color={item.method && props.methods ? props.methods[item.method] : ''}>
+                  {item.method}
+                </Tag>
+                {item.path}
+              </Select.Option>
+            ))}
           </Select>
         </Form.Item>
       </Form>

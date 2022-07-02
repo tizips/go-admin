@@ -3,29 +3,20 @@ import React, { useEffect, useState } from 'react';
 import { doCreate, doUpdate } from './service';
 import Constants from '@/utils/Constants';
 import Pattern from '@/utils/Pattern';
-import { useModel } from '@@/plugin-model/useModel';
+import { useModel } from 'umi';
 import { doRoleByEnable } from '@/services/site';
 
-const Editor: React.FC<APIAuthAdmin.Props> = (props) => {
-  const init: APIAuthAdmin.Former = {
-    username: '',
-    nickname: '',
-    mobile: '',
-    password: '',
-    is_enable: 1,
-    roles: [],
-  };
-
+const Editor: React.FC<APISiteAuthAdmin.Props> = (props) => {
   const { initialState } = useModel('@@initialState');
 
-  const [former] = Form.useForm();
-  const [roles, setRoles] = useState<APIResponse.Online[]>([]);
-  const [loading, setLoading] = useState<APIAuthAdmin.Loading>({});
+  const [former] = Form.useForm<APISiteAuthAdmin.Former>();
+  const [roles, setRoles] = useState<APIData.Online[]>([]);
+  const [loading, setLoading] = useState<APISiteAuthAdmin.Loading>({});
 
   const toPermissions = () => {
     setLoading({ ...loading, permission: true });
     doRoleByEnable()
-      .then((response: APIResponse.Response<APIAuthAdmin.Role[]>) => {
+      .then((response: APIResponse.Response<APISiteAuthAdmin.Role[]>) => {
         if (response.code === Constants.Success) {
           setRoles(response.data);
         }
@@ -65,8 +56,8 @@ const Editor: React.FC<APIAuthAdmin.Props> = (props) => {
       .finally(() => setLoading({ ...loading, confirmed: false }));
   };
 
-  const onSubmit = (values: APIAuthAdmin.Former) => {
-    const params: APIAuthAdmin.Editor = {
+  const onSubmit = (values: APISiteAuthAdmin.Former) => {
+    const params: APISiteAuthAdmin.Editor = {
       username: values.username,
       nickname: values.nickname,
       mobile: values.mobile,
@@ -80,13 +71,22 @@ const Editor: React.FC<APIAuthAdmin.Props> = (props) => {
   };
 
   const toInit = () => {
-    const data = init;
+    const data: APISiteAuthAdmin.Former = {
+      username: '',
+      nickname: '',
+      mobile: '',
+      password: '',
+      is_enable: 1,
+      roles: [],
+    };
+
     if (props.params) {
       data.nickname = props.params.nickname;
       data.mobile = props.params.mobile;
       data.is_enable = props.params.is_enable;
       props.params.roles?.forEach((item) => data.roles?.push(item.id));
     }
+
     former.setFieldsValue(data);
   };
 
@@ -107,7 +107,7 @@ const Editor: React.FC<APIAuthAdmin.Props> = (props) => {
       onCancel={props.onCancel}
       confirmLoading={loading.confirmed}
     >
-      <Form form={former} initialValues={init} onFinish={onSubmit} labelCol={{ span: 4 }}>
+      <Form form={former} onFinish={onSubmit} labelCol={{ span: 4 }}>
         {!props.params ? (
           <Form.Item
             label="账号"

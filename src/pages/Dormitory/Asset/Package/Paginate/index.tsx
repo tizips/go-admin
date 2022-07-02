@@ -9,17 +9,17 @@ import Loop from '@/utils/Loop';
 import Authorize from '@/components/Basic/Authorize';
 
 const Paginate: React.FC = () => {
-  const [editor, setEditor] = useState<APIAssetPackages.Data | undefined>();
-  const [search, setSearch] = useState<APIAssetPackages.Search>({});
+  const [editor, setEditor] = useState<APIDormitoryAssetPackages.Data | undefined>();
+  const [search, setSearch] = useState<APIDormitoryAssetPackages.Search>({});
   const [loadingPaginate, setLoadingPaginate] = useState(false);
-  const [visible, setVisible] = useState<APIAssetPackages.Visible>({});
-  const [data, setData] = useState<APIAssetPackages.Data[]>();
+  const [visible, setVisible] = useState<APIDormitoryAssetPackages.Visible>({});
+  const [data, setData] = useState<APIDormitoryAssetPackages.Data[]>();
   const [paginate, setPaginate] = useState<APIData.Paginate>({});
 
   const toPaginate = () => {
     setLoadingPaginate(true);
     doPaginate(search)
-      .then((response: APIResponse.Paginate<APIAssetPackages.Data[]>) => {
+      .then((response: APIResponse.Paginate<APIDormitoryAssetPackages.Data[]>) => {
         if (response.code === Constants.Success) {
           setPaginate({
             page: response.data.page,
@@ -32,9 +32,9 @@ const Paginate: React.FC = () => {
       .finally(() => setLoadingPaginate(false));
   };
 
-  const onDelete = (record: APIAssetPackages.Data) => {
+  const onDelete = (record: APIDormitoryAssetPackages.Data) => {
     if (data) {
-      const temp: APIAssetPackages.Data[] = [...data];
+      const temp: APIDormitoryAssetPackages.Data[] = [...data];
       Loop.ById(temp, record.id, (item) => (item.loading_deleted = true));
       setData(temp);
     }
@@ -50,7 +50,7 @@ const Paginate: React.FC = () => {
       })
       .finally(() => {
         if (data) {
-          const temp: APIAssetPackages.Data[] = [...data];
+          const temp: APIDormitoryAssetPackages.Data[] = [...data];
           Loop.ById(temp, record.id, (item) => (item.loading_deleted = false));
           setData(temp);
         }
@@ -62,7 +62,7 @@ const Paginate: React.FC = () => {
     setVisible({ ...visible, create: true });
   };
 
-  const onUpdate = (record: APIAssetPackages.Data) => {
+  const onUpdate = (record: APIDormitoryAssetPackages.Data) => {
     setVisible({ ...visible, create: true });
 
     setEditor(record);
@@ -129,7 +129,7 @@ const Paginate: React.FC = () => {
           <Table.Column title="名称" dataIndex="name" />
           <Table.Column
             title="设备"
-            render={(record: APIAssetPackages.Data) =>
+            render={(record: APIDormitoryAssetPackages.Data) =>
               record.devices?.map((item) => (
                 <Tag key={item.id} color="green">
                   {item.name} * {item.number}
@@ -139,14 +139,14 @@ const Paginate: React.FC = () => {
           />
           <Table.Column
             title="创建时间"
-            render={(record: APIAssetPackages.Data) =>
+            render={(record: APIDormitoryAssetPackages.Data) =>
               record.created_at && moment(record.created_at).format('YYYY/MM/DD')
             }
           />
           <Table.Column
             align="center"
             width={100}
-            render={(record: APIAssetPackages.Data) => (
+            render={(record: APIDormitoryAssetPackages.Data) => (
               <>
                 <Authorize permission="dormitory.asset.package.update">
                   <Button type="link" onClick={() => onUpdate(record)}>

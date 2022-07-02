@@ -1,5 +1,4 @@
-declare namespace APIStayCategories {
-
+declare namespace APIDormitoryStayCategories {
   type Data = {
     id?: number;
     name?: string;
@@ -9,10 +8,9 @@ declare namespace APIStayCategories {
     created_at?: string;
     loading_deleted?: boolean;
     loading_enable?: boolean;
-  }
+  };
 
   type Visible = {
     editor?: boolean;
-  }
-
+  };
 }

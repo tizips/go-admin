@@ -1,4 +1,4 @@
-declare namespace APIAuthRoles {
+declare namespace APISiteAuthRoles {
   type Data = {
     id?: number;
     name?: string;

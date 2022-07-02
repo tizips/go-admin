@@ -5,26 +5,16 @@ import Constants from '@/utils/Constants';
 import { doFloorByOnline, doTypeByOnline } from '@/services/dormitory';
 import Loop from '@/utils/Loop';
 
-const Editor: React.FC<APIBasicRoom.Props> = (props) => {
-  const init: APIBasicRoom.Former = {
-    name: '',
-    positions: undefined,
-    type: undefined,
-    order: 50,
-    is_furnish: 2,
-    is_enable: 1,
-    is_public: 2,
-  };
-
-  const [former] = Form.useForm();
-  const [loading, setLoading] = useState<APIBasicRoom.Loading>({});
-  const [types, setTypes] = useState<APIResponse.Online[]>([]);
+const Editor: React.FC<APIDormitoryBasicRoom.Props> = (props) => {
+  const [former] = Form.useForm<APIDormitoryBasicRoom.Former>();
+  const [loading, setLoading] = useState<APIDormitoryBasicRoom.Loading>({});
+  const [types, setTypes] = useState<APIData.Online[]>([]);
   const [positions, setPositions] = useState<APIData.Tree[]>([]);
-  const [isPublic, setIsPublic] = useState(init.is_public);
+  const isPublic = Form.useWatch('is_public', former);
 
   const toFloorsByOnline = (id?: number) => {
     doFloorByOnline(id, { is_public: 2 }).then(
-      (response: APIResponse.Response<APIResponse.Online[]>) => {
+      (response: APIResponse.Response<APIData.Online[]>) => {
         const data = [...positions];
         Loop.ById(
           data,
@@ -47,7 +37,7 @@ const Editor: React.FC<APIBasicRoom.Props> = (props) => {
   const toTypesByOnline = () => {
     setLoading({ ...loading, type: true });
     doTypeByOnline()
-      .then((response: APIResponse.Response<APIResponse.Online[]>) => {
+      .then((response: APIResponse.Response<APIData.Online[]>) => {
         if (response.code == Constants.Success) setTypes(response.data);
       })
       .finally(() => setLoading({ ...loading, type: false }));
@@ -84,8 +74,8 @@ const Editor: React.FC<APIBasicRoom.Props> = (props) => {
       .finally(() => setLoading({ ...loading, confirmed: false }));
   };
 
-  const onSubmit = (values: APIBasicRoom.Former) => {
-    const params: APIBasicRoom.Editor = {
+  const onSubmit = (values: APIDormitoryBasicRoom.Former) => {
+    const params: APIDormitoryBasicRoom.Editor = {
       name: values.name,
       order: values.order,
       is_furnish: values.is_furnish,
@@ -110,7 +100,15 @@ const Editor: React.FC<APIBasicRoom.Props> = (props) => {
   };
 
   const toInit = () => {
-    const data = init;
+    const data: APIDormitoryBasicRoom.Former = {
+      name: '',
+      positions: undefined,
+      type: undefined,
+      order: 50,
+      is_furnish: 2,
+      is_enable: 1,
+      is_public: 2,
+    };
 
     if (props.params) {
       data.name = props.params.name;
@@ -121,8 +119,6 @@ const Editor: React.FC<APIBasicRoom.Props> = (props) => {
       data.is_enable = props.params.is_enable;
       data.is_public = props.params.is_public;
     }
-
-    setIsPublic(data.is_public);
 
     former.setFieldsValue(data);
   };
@@ -155,7 +151,7 @@ const Editor: React.FC<APIBasicRoom.Props> = (props) => {
       onCancel={props.onCancel}
       confirmLoading={loading.confirmed}
     >
-      <Form form={former} initialValues={init} onFinish={onSubmit}>
+      <Form form={former} onFinish={onSubmit}>
         <Form.Item label="名称" name="name" rules={[{ required: true }, { max: 20 }]}>
           <Input />
         </Form.Item>
@@ -216,7 +212,7 @@ const Editor: React.FC<APIBasicRoom.Props> = (props) => {
         </Form.Item>
         {!props.params ? (
           <Form.Item label="公共" name="is_public" rules={[{ required: true }]}>
-            <Select onChange={(value) => setIsPublic(value)}>
+            <Select>
               <Select.Option value={1}>公共区域</Select.Option>
               <Select.Option value={2}>非公共区域</Select.Option>
             </Select>

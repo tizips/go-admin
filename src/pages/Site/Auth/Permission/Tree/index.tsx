@@ -32,13 +32,13 @@ const methods = {
 const Tree: React.FC = () => {
   const { initialState } = useModel('@@initialState');
 
-  const [editor, setEditor] = useState<APIAuthPermissions.Data | undefined>();
+  const [editor, setEditor] = useState<APISiteAuthPermissions.Data | undefined>();
   const [loadingPaginate, setLoadingPaginate] = useState(false);
-  const [visible, setVisible] = useState<APIAuthPermissions.Visible>({});
-  const [data, setData] = useState<APIAuthPermissions.Data[]>();
+  const [visible, setVisible] = useState<APISiteAuthPermissions.Visible>({});
+  const [data, setData] = useState<APISiteAuthPermissions.Data[]>();
   const [modules, setModules] = useState<APISite.Module[]>([]);
-  const [loading, setLoading] = useState<APIAuthPermissions.Loading>({});
-  const [active, setActive] = useState<APIAuthPermissions.Active>({});
+  const [loading, setLoading] = useState<APISiteAuthPermissions.Loading>({});
+  const [active, setActive] = useState<APISiteAuthPermissions.Active>({});
 
   const toModules = () => {
     setLoading({ ...loading, module: true });
@@ -55,13 +55,13 @@ const Tree: React.FC = () => {
   const toTree = () => {
     setLoadingPaginate(true);
     doTree(active.module)
-      .then((response: APIResponse.Response<APIAuthPermissions.Data[]>) => {
+      .then((response: APIResponse.Response<APISiteAuthPermissions.Data[]>) => {
         if (response.code === Constants.Success) setData(response.data);
       })
       .finally(() => setLoadingPaginate(false));
   };
 
-  const onDelete = (record: APIAuthPermissions.Data) => {
+  const onDelete = (record: APISiteAuthPermissions.Data) => {
     if (data) {
       const temp = [...data];
       Loop.ById(temp, record.id, (item) => (item.loading_deleted = true));
@@ -91,7 +91,7 @@ const Tree: React.FC = () => {
     setVisible({ ...visible, editor: true });
   };
 
-  const onUpdate = (record: APIAuthPermissions.Data) => {
+  const onUpdate = (record: APISiteAuthPermissions.Data) => {
     setEditor(record);
     setVisible({ ...visible, editor: true });
   };
@@ -162,14 +162,14 @@ const Tree: React.FC = () => {
           <Table.Column title="名称" dataIndex="name" />
           <Table.Column
             title="标识"
-            render={(record: APIAuthPermissions.Data) => (
+            render={(record: APISiteAuthPermissions.Data) => (
               <span style={{ color: initialState?.settings?.primaryColor }}>{record.slug}</span>
             )}
           />
           <Table.Column
             title="接口"
             align="right"
-            render={(record: APIAuthPermissions.Data) =>
+            render={(record: APISiteAuthPermissions.Data) =>
               record.method && (
                 <Tag color={record.method && methods ? methods[record.method] : '#2db7f5'}>
                   {record.method?.toUpperCase()}
@@ -178,7 +178,7 @@ const Tree: React.FC = () => {
             }
           />
           <Table.Column
-            render={(record: APIAuthPermissions.Data) =>
+            render={(record: APISiteAuthPermissions.Data) =>
               record.path && (
                 <Tag
                   className={styles.path}
@@ -193,7 +193,7 @@ const Tree: React.FC = () => {
             title="操作"
             align="center"
             width={100}
-            render={(record: APIAuthPermissions.Data) => (
+            render={(record: APISiteAuthPermissions.Data) => (
               <>
                 <Authorize permission="site.auth.permission.update">
                   <Button type="link" onClick={() => onUpdate(record)}>

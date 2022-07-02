@@ -1,7 +1,7 @@
-declare namespace APIStayPeople {
+declare namespace APIDormitoryStayPeople {
   type Props = {
     visible?: boolean;
-    buildings?: APIResponse.Online[];
+    buildings?: APIData.Online[];
     onCreate?: () => void;
     onCancel?: () => void;
   };

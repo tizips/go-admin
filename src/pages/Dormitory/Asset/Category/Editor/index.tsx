@@ -3,15 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { doCreate, doUpdate } from './service';
 import Constants from '@/utils/Constants';
 
-const Editor: React.FC<APIAssetCategory.Props> = (props) => {
-  const init: APIAssetCategory.Former = {
-    name: '',
-    order: 50,
-    is_enable: 1,
-  };
-
-  const [former] = Form.useForm();
-  const [loading, setLoading] = useState<APIAssetCategory.Loading>({});
+const Editor: React.FC<APIDormitoryAssetCategory.Props> = (props) => {
+  const [former] = Form.useForm<APIDormitoryAssetCategory.Former>();
+  const [loading, setLoading] = useState<APIDormitoryAssetCategory.Loading>({});
 
   const toCreate = (params: any) => {
     setLoading({ ...loading, confirmed: true });
@@ -44,8 +38,8 @@ const Editor: React.FC<APIAssetCategory.Props> = (props) => {
       .finally(() => setLoading({ ...loading, confirmed: false }));
   };
 
-  const onSubmit = (values: APIAssetCategory.Former) => {
-    const params: APIAssetCategory.Editor = {
+  const onSubmit = (values: APIDormitoryAssetCategory.Former) => {
+    const params: APIDormitoryAssetCategory.Editor = {
       name: values.name,
       order: values.order,
       is_enable: values.is_enable,
@@ -56,7 +50,7 @@ const Editor: React.FC<APIAssetCategory.Props> = (props) => {
   };
 
   const toInit = () => {
-    const data = init;
+    const data: APIDormitoryAssetCategory.Former = { name: '', order: 50, is_enable: 1 };
 
     if (props.params) {
       data.name = props.params.name;
@@ -82,7 +76,7 @@ const Editor: React.FC<APIAssetCategory.Props> = (props) => {
       onCancel={props.onCancel}
       confirmLoading={loading.confirmed}
     >
-      <Form form={former} initialValues={init} onFinish={onSubmit}>
+      <Form form={former} onFinish={onSubmit}>
         <Form.Item label="名称" name="name" rules={[{ required: true }, { max: 20 }]}>
           <Input />
         </Form.Item>

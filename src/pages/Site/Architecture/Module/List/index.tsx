@@ -13,7 +13,7 @@ import {
 } from 'antd';
 import Constants from '@/utils/Constants';
 import { FormOutlined, RedoOutlined } from '@ant-design/icons';
-import { useModel } from '@@/plugin-model/useModel';
+import { useModel } from 'umi';
 import Editor from '@/pages/Site/Architecture/Module/Editor';
 import { doDelete, doEnable, doList } from './service';
 import Loop from '@/utils/Loop';
@@ -23,15 +23,15 @@ import Enable from '@/components/Basic/Enable';
 const Tree: React.FC = () => {
   const { initialState } = useModel('@@initialState');
 
-  const [editor, setEditor] = useState<APIArchitectureModules.Data | undefined>();
+  const [editor, setEditor] = useState<APISiteArchitectureModules.Data | undefined>();
   const [loadingPaginate, setLoadingPaginate] = useState(false);
-  const [visible, setVisible] = useState<APIArchitectureModules.Visible>({});
-  const [data, setData] = useState<APIArchitectureModules.Data[]>();
+  const [visible, setVisible] = useState<APISiteArchitectureModules.Visible>({});
+  const [data, setData] = useState<APISiteArchitectureModules.Data[]>();
 
   const toList = () => {
     setLoadingPaginate(true);
     doList()
-      .then((response: APIResponse.Response<APIArchitectureModules.Data[]>) => {
+      .then((response: APIResponse.Response<APISiteArchitectureModules.Data[]>) => {
         if (response.code === Constants.Success) {
           setData(response.data);
         }
@@ -39,13 +39,13 @@ const Tree: React.FC = () => {
       .finally(() => setLoadingPaginate(false));
   };
 
-  const onDelete = (record: APIArchitectureModules.Data) => {
+  const onDelete = (record: APISiteArchitectureModules.Data) => {
     if (data) {
-      const temp: APIArchitectureModules.Data[] = [...data];
+      const temp: APISiteArchitectureModules.Data[] = [...data];
       Loop.ById(
         temp,
         record.id,
-        (item: APIArchitectureModules.Data) => (item.loading_deleted = true),
+        (item: APISiteArchitectureModules.Data) => (item.loading_deleted = true),
       );
       setData(temp);
     }
@@ -61,24 +61,24 @@ const Tree: React.FC = () => {
       })
       .finally(() => {
         if (data) {
-          const temp: APIArchitectureModules.Data[] = [...data];
+          const temp: APISiteArchitectureModules.Data[] = [...data];
           Loop.ById(
             temp,
             record.id,
-            (item: APIArchitectureModules.Data) => (item.loading_deleted = false),
+            (item: APISiteArchitectureModules.Data) => (item.loading_deleted = false),
           );
           setData(temp);
         }
       });
   };
 
-  const onEnable = (record: APIArchitectureModules.Data) => {
+  const onEnable = (record: APISiteArchitectureModules.Data) => {
     if (data) {
-      const temp: APIArchitectureModules.Data[] = [...data];
+      const temp: APISiteArchitectureModules.Data[] = [...data];
       Loop.ById(
         temp,
         record.id,
-        (item: APIArchitectureModules.Data) => (item.loading_enable = true),
+        (item: APISiteArchitectureModules.Data) => (item.loading_enable = true),
       );
       setData(temp);
     }
@@ -98,7 +98,7 @@ const Tree: React.FC = () => {
             Loop.ById(
               temp,
               record.id,
-              (item: APIArchitectureModules.Data) => (item.is_enable = enable.is_enable),
+              (item: APISiteArchitectureModules.Data) => (item.is_enable = enable.is_enable),
             );
             setData(temp);
           }
@@ -110,7 +110,7 @@ const Tree: React.FC = () => {
           Loop.ById(
             temp,
             record.id,
-            (item: APIArchitectureModules.Data) => (item.loading_deleted = false),
+            (item: APISiteArchitectureModules.Data) => (item.loading_deleted = false),
           );
           setData(temp);
         }
@@ -122,7 +122,7 @@ const Tree: React.FC = () => {
     setVisible({ ...visible, editor: true });
   };
 
-  const onUpdate = (record: APIArchitectureModules.Data) => {
+  const onUpdate = (record: APISiteArchitectureModules.Data) => {
     setEditor(record);
     setVisible({ ...visible, editor: true });
   };
@@ -177,21 +177,21 @@ const Tree: React.FC = () => {
           <Table.Column
             title="标示"
             align="center"
-            render={(record: APIArchitectureModules.Data) => (
+            render={(record: APISiteArchitectureModules.Data) => (
               <Tag color={initialState?.settings?.primaryColor}>{record.slug}</Tag>
             )}
           />
           <Table.Column
             title="序号"
             align="center"
-            render={(record: APIArchitectureModules.Data) => (
+            render={(record: APISiteArchitectureModules.Data) => (
               <Tag color={initialState?.settings?.primaryColor}>{record.order}</Tag>
             )}
           />
           <Table.Column
             title="启用"
             align="center"
-            render={(record: APIArchitectureModules.Data) => (
+            render={(record: APISiteArchitectureModules.Data) => (
               <Authorize
                 permission="site.architecture.module.enable"
                 fallback={<Enable is_enable={record.is_enable} />}
@@ -208,7 +208,7 @@ const Tree: React.FC = () => {
           <Table.Column
             align="center"
             width={100}
-            render={(record: APIArchitectureModules.Data) => (
+            render={(record: APISiteArchitectureModules.Data) => (
               <>
                 <Authorize permission="site.architecture.module.create">
                   <Button type="link" onClick={() => onUpdate(record)}>

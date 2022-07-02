@@ -3,16 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { doCreate, doUpdate } from './service';
 import Constants from '@/utils/Constants';
 
-const Editor: React.FC<APIArchitectureModule.Props> = (props) => {
-  const init: APIArchitectureModule.Former = {
-    slug: '',
-    name: '',
-    order: 50,
-    is_enable: 1,
-  };
-
-  const [former] = Form.useForm();
-  const [loading, setLoading] = useState<APIArchitectureModule.Loading>({});
+const Editor: React.FC<APISiteArchitectureModule.Props> = (props) => {
+  const [former] = Form.useForm<APISiteArchitectureModule.Former>();
+  const [loading, setLoading] = useState<APISiteArchitectureModule.Loading>({});
 
   const toCreate = (params: any) => {
     setLoading({ ...loading, confirmed: true });
@@ -45,8 +38,8 @@ const Editor: React.FC<APIArchitectureModule.Props> = (props) => {
       .finally(() => setLoading({ ...loading, confirmed: false }));
   };
 
-  const onSubmit = (values: APIArchitectureModule.Former) => {
-    const params: APIArchitectureModule.Editor = {
+  const onSubmit = (values: APISiteArchitectureModule.Former) => {
+    const params: APISiteArchitectureModule.Editor = {
       slug: values.slug,
       name: values.name,
       order: values.order,
@@ -58,18 +51,22 @@ const Editor: React.FC<APIArchitectureModule.Props> = (props) => {
   };
 
   const toInitByUpdate = () => {
-    const data: APIArchitectureModule.Former = {
+    former.setFieldsValue({
       slug: props.params?.slug,
       name: props.params?.name,
       order: props.params?.order,
       is_enable: props.params?.is_enable,
-    };
-
-    former.setFieldsValue(data);
+    });
   };
 
   const toInit = () => {
-    if (!props.params) former.setFieldsValue(init);
+    if (!props.params)
+      former.setFieldsValue({
+        slug: '',
+        name: '',
+        order: 50,
+        is_enable: 1,
+      });
     else toInitByUpdate();
   };
 
@@ -88,7 +85,7 @@ const Editor: React.FC<APIArchitectureModule.Props> = (props) => {
       onCancel={props.onCancel}
       confirmLoading={loading.confirmed}
     >
-      <Form form={former} initialValues={init} onFinish={onSubmit}>
+      <Form form={former} onFinish={onSubmit}>
         <Form.Item label="名称" name="name" rules={[{ required: true }, { max: 20 }]}>
           <Input />
         </Form.Item>

@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/no-namespace
 declare namespace APIData {
   type Paginate = {
     size?: number;
@@ -13,5 +12,10 @@ declare namespace APIData {
     disabled?: boolean;
     isLeaf?: boolean;
     children?: Tree[];
+  };
+
+  type Online = {
+    id?: number;
+    name?: string;
   };
 }

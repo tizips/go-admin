@@ -15,8 +15,8 @@ import {
 import Loop from '@/utils/Loop';
 import Pattern from '@/utils/Pattern';
 
-const Create: React.FC<APIAssetGrant.Props> = (props) => {
-  const init: APIAssetGrant.Former = {
+const Create: React.FC<APIDormitoryAssetGrant.Props> = (props) => {
+  const init: APIDormitoryAssetGrant.Former = {
     object: 'package',
     package: undefined,
     device: undefined,
@@ -28,9 +28,9 @@ const Create: React.FC<APIAssetGrant.Props> = (props) => {
   };
 
   const [former] = Form.useForm();
-  const [loading, setLoading] = useState<APIAssetGrant.Loading>({});
+  const [loading, setLoading] = useState<APIDormitoryAssetGrant.Loading>({});
   const [devices, setDevices] = useState<APIData.Tree[]>([]);
-  const [packages, setPackages] = useState<APIResponse.Online[]>([]);
+  const [packages, setPackages] = useState<APIData.Online[]>([]);
   const [positions, setPositions] = useState<APIData.Tree[]>([]);
   const [types, setTypes] = useState<APIData.Tree[]>([]);
   const [position, setPosition] = useState(init.position);
@@ -59,7 +59,7 @@ const Create: React.FC<APIAssetGrant.Props> = (props) => {
   const toCategoriesByOnline = () => {
     setLoading({ ...loading, category: true });
     doAssetCategoryByOnline()
-      .then((response: APIResponse.Response<APIResponse.Online[]>) => {
+      .then((response: APIResponse.Response<APIData.Online[]>) => {
         if (response.code == Constants.Success) {
           const data: APIData.Tree[] = [];
           response.data.forEach((item) =>
@@ -74,7 +74,7 @@ const Create: React.FC<APIAssetGrant.Props> = (props) => {
   const toPackagesByOnline = () => {
     setLoading({ ...loading, packages: true });
     doAssetPackageByOnline()
-      .then((response: APIResponse.Response<APIResponse.Online[]>) => {
+      .then((response: APIResponse.Response<APIData.Online[]>) => {
         if (response.code == Constants.Success) setPackages(response.data);
       })
       .finally(() => setLoading({ ...loading, packages: false }));
@@ -101,7 +101,7 @@ const Create: React.FC<APIAssetGrant.Props> = (props) => {
   };
 
   const toDevices = (id?: number) => {
-    doAssetDeviceByOnline(id).then((response: APIResponse.Response<APIResponse.Online[]>) => {
+    doAssetDeviceByOnline(id).then((response: APIResponse.Response<APIData.Online[]>) => {
       if (response.code == Constants.Success) {
         const data = [...devices];
         Loop.ById(data, id, (item: APIData.Tree) => (item.children = response.data), 'category');
@@ -166,7 +166,7 @@ const Create: React.FC<APIAssetGrant.Props> = (props) => {
 
   const toBedsByOnline = (id?: number) => {
     doBedByOnline(id, { with_public: true }).then(
-      (response: APIResponse.Response<APIResponse.Online[]>) => {
+      (response: APIResponse.Response<APIData.Online[]>) => {
         const data = [...positions];
         Loop.ById(
           data,
@@ -197,8 +197,8 @@ const Create: React.FC<APIAssetGrant.Props> = (props) => {
       .finally(() => setLoading({ ...loading, confirmed: false }));
   };
 
-  const onSubmit = (values: APIAssetGrant.Former) => {
-    const params: APIAssetGrant.Editor = {
+  const onSubmit = (values: APIDormitoryAssetGrant.Former) => {
+    const params: APIDormitoryAssetGrant.Editor = {
       object: values.object,
       package: values.package,
       position: values.position,

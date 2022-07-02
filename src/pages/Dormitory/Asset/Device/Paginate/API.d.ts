@@ -1,4 +1,4 @@
-declare namespace APIAssetDevices {
+declare namespace APIDormitoryAssetDevices {
   type Data = {
     id?: number;
     category?: string;
