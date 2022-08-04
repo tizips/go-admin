@@ -42,8 +42,8 @@ export default defineConfig({
   title: false,
   ignoreMomentLocale: true,
   proxy: proxy[REACT_APP_ENV || 'dev'],
-  base: '/',
-  publicPath: '/',
+  base: REACT_APP_ENV != 'dev' ? '/admin/' : '/',
+  publicPath: REACT_APP_ENV != 'dev' ? '/admin/' : '/',
   // Fast Refresh 热更新
   fastRefresh: {},
   mfsu: {},
