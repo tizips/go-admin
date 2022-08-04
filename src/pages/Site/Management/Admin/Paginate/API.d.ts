@@ -1,4 +1,4 @@
-declare namespace APISiteAuthAdmins {
+declare namespace APISiteManagementAdmins {
   type Data = {
     id?: number;
     username?: string;

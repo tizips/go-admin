@@ -1,4 +1,4 @@
-declare namespace APISiteAuthRoles {
+declare namespace APISiteManagementRoles {
   type Data = {
     id?: number;
     name?: string;

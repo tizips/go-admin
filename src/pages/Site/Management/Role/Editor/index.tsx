@@ -3,15 +3,15 @@ import React, { useEffect, useState } from 'react';
 import { doCreate, doPermissionBySelf, doUpdate } from './service';
 import Constants from '@/utils/Constants';
 
-const Editor: React.FC<APISiteAuthRole.Props> = (props) => {
-  const [former] = Form.useForm<APISiteAuthRole.Former>();
+const Editor: React.FC<APISiteManagementRole.Props> = (props) => {
+  const [former] = Form.useForm<APISiteManagementRole.Former>();
   const [permissions, setPermissions] = useState<any[]>([]);
-  const [loading, setLoading] = useState<APISiteAuthRole.Loading>({});
+  const [loading, setLoading] = useState<APISiteManagementRole.Loading>({});
 
   const toPermissions = () => {
     setLoading({ ...loading, permission: true });
     doPermissionBySelf()
-      .then((response: APIResponse.Response<APISiteAuthRole.Permission[]>) => {
+      .then((response: APIResponse.Response<APISiteManagementRole.Permission[]>) => {
         if (response.code === Constants.Success) {
           setPermissions(response.data);
         }
@@ -51,8 +51,8 @@ const Editor: React.FC<APISiteAuthRole.Props> = (props) => {
       .finally(() => setLoading({ ...loading, confirmed: false }));
   };
 
-  const onSubmit = (values: APISiteAuthRole.Former) => {
-    const params: APISiteAuthRole.Editor = {
+  const onSubmit = (values: APISiteManagementRole.Former) => {
+    const params: APISiteManagementRole.Editor = {
       name: values.name,
       summary: values.summary,
       permissions: values.permissions,
@@ -63,7 +63,7 @@ const Editor: React.FC<APISiteAuthRole.Props> = (props) => {
   };
 
   const toInit = () => {
-    const data: APISiteAuthRole.Former = {
+    const data: APISiteManagementRole.Former = {
       name: '',
       summary: '',
       permissions: [],

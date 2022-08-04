@@ -9,5 +9,5 @@ export async function doApis(module?: number) {
 }
 
 export async function doRoleByEnable() {
-  return request<APIResponse.Response<any>>('/api/admin/site/auth/role/enable');
+  return request<APIResponse.Response<any>>('/api/admin/site/management/role/enable');
 }

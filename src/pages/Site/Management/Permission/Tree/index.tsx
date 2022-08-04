@@ -15,7 +15,7 @@ import Constants from '@/utils/Constants';
 import { FormOutlined, RedoOutlined } from '@ant-design/icons';
 import { useModel } from '@@/plugin-model/useModel';
 import Authorize from '@/components/Basic/Authorize';
-import Editor from '@/pages/Site/Auth/Permission/Editor';
+import Editor from '@/pages/Site/Management/Permission/Editor';
 import { doDelete, doTree } from './service';
 import Loop from '@/utils/Loop';
 import { doModuleByOnline } from '@/services/site';
@@ -32,13 +32,13 @@ const methods = {
 const Tree: React.FC = () => {
   const { initialState } = useModel('@@initialState');
 
-  const [editor, setEditor] = useState<APISiteAuthPermissions.Data | undefined>();
+  const [editor, setEditor] = useState<APISiteManagementPermissions.Data | undefined>();
   const [loadingPaginate, setLoadingPaginate] = useState(false);
-  const [visible, setVisible] = useState<APISiteAuthPermissions.Visible>({});
-  const [data, setData] = useState<APISiteAuthPermissions.Data[]>();
+  const [visible, setVisible] = useState<APISiteManagementPermissions.Visible>({});
+  const [data, setData] = useState<APISiteManagementPermissions.Data[]>();
   const [modules, setModules] = useState<APISite.Module[]>([]);
-  const [loading, setLoading] = useState<APISiteAuthPermissions.Loading>({});
-  const [active, setActive] = useState<APISiteAuthPermissions.Active>({});
+  const [loading, setLoading] = useState<APISiteManagementPermissions.Loading>({});
+  const [active, setActive] = useState<APISiteManagementPermissions.Active>({});
 
   const toModules = () => {
     setLoading({ ...loading, module: true });
@@ -55,13 +55,13 @@ const Tree: React.FC = () => {
   const toTree = () => {
     setLoadingPaginate(true);
     doTree(active.module)
-      .then((response: APIResponse.Response<APISiteAuthPermissions.Data[]>) => {
+      .then((response: APIResponse.Response<APISiteManagementPermissions.Data[]>) => {
         if (response.code === Constants.Success) setData(response.data);
       })
       .finally(() => setLoadingPaginate(false));
   };
 
-  const onDelete = (record: APISiteAuthPermissions.Data) => {
+  const onDelete = (record: APISiteManagementPermissions.Data) => {
     if (data) {
       const temp = [...data];
       Loop.ById(temp, record.id, (item) => (item.loading_deleted = true));
@@ -91,7 +91,7 @@ const Tree: React.FC = () => {
     setVisible({ ...visible, editor: true });
   };
 
-  const onUpdate = (record: APISiteAuthPermissions.Data) => {
+  const onUpdate = (record: APISiteManagementPermissions.Data) => {
     setEditor(record);
     setVisible({ ...visible, editor: true });
   };
@@ -142,7 +142,7 @@ const Tree: React.FC = () => {
                 />
               </Tooltip>
             </Col>
-            <Authorize permission="site.auth.permission.create">
+            <Authorize permission="site.management.permission.create">
               <Col>
                 <Tooltip title="创建">
                   <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
@@ -162,14 +162,14 @@ const Tree: React.FC = () => {
           <Table.Column title="名称" dataIndex="name" />
           <Table.Column
             title="标识"
-            render={(record: APISiteAuthPermissions.Data) => (
+            render={(record: APISiteManagementPermissions.Data) => (
               <span style={{ color: initialState?.settings?.primaryColor }}>{record.slug}</span>
             )}
           />
           <Table.Column
             title="接口"
             align="right"
-            render={(record: APISiteAuthPermissions.Data) =>
+            render={(record: APISiteManagementPermissions.Data) =>
               record.method && (
                 <Tag color={record.method && methods ? methods[record.method] : '#2db7f5'}>
                   {record.method?.toUpperCase()}
@@ -178,7 +178,7 @@ const Tree: React.FC = () => {
             }
           />
           <Table.Column
-            render={(record: APISiteAuthPermissions.Data) =>
+            render={(record: APISiteManagementPermissions.Data) =>
               record.path && (
                 <Tag
                   className={styles.path}
@@ -193,14 +193,14 @@ const Tree: React.FC = () => {
             title="操作"
             align="center"
             width={100}
-            render={(record: APISiteAuthPermissions.Data) => (
+            render={(record: APISiteManagementPermissions.Data) => (
               <>
-                <Authorize permission="site.auth.permission.update">
+                <Authorize permission="site.management.permission.update">
                   <Button type="link" onClick={() => onUpdate(record)}>
                     编辑
                   </Button>
                 </Authorize>
-                <Authorize permission="site.auth.permission.delete">
+                <Authorize permission="site.management.permission.delete">
                   <Popconfirm
                     title="确定要删除该数据?"
                     placement="leftTop"

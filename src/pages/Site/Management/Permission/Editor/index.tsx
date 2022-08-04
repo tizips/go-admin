@@ -4,17 +4,17 @@ import { doCreate, doParents, doUpdate } from './service';
 import Constants from '@/utils/Constants';
 import { doApis } from '@/services/site';
 
-const Editor: React.FC<APISiteAuthPermission.Props> = (props) => {
-  const [former] = Form.useForm<APISiteAuthPermission.Former>();
-  const [apis, setApis] = useState<APISiteAuthPermission.Api[]>([]);
+const Editor: React.FC<APISiteManagementPermission.Props> = (props) => {
+  const [former] = Form.useForm<APISiteManagementPermission.Former>();
+  const [apis, setApis] = useState<APISiteManagementPermission.Api[]>([]);
   const [parents, setParents] = useState<any[]>([]);
-  const [loading, setLoading] = useState<APISiteAuthPermission.Loading>({});
+  const [loading, setLoading] = useState<APISiteManagementPermission.Loading>({});
   const [parent, setParent] = useState([]);
 
   const toApis = () => {
     setLoading({ ...loading, api: true });
     doApis(props.module)
-      .then((response: APIResponse.Response<APISiteAuthPermission.Api[]>) => {
+      .then((response: APIResponse.Response<APISiteManagementPermission.Api[]>) => {
         if (response.code === Constants.Success) {
           const data = response.data;
           if (props.params) data.push({ method: props.params.method, path: props.params.path });
@@ -27,7 +27,7 @@ const Editor: React.FC<APISiteAuthPermission.Props> = (props) => {
   const toParents = () => {
     setLoading({ ...loading, parent: true });
     doParents(props.module)
-      .then((response: APIResponse.Response<APISiteAuthPermission.Parent[]>) => {
+      .then((response: APIResponse.Response<APISiteManagementPermission.Parent[]>) => {
         if (response.code === Constants.Success) {
           setParents(response.data);
         }
@@ -71,10 +71,10 @@ const Editor: React.FC<APISiteAuthPermission.Props> = (props) => {
       .finally(() => setLoading({ ...loading, confirmed: false }));
   };
 
-  const onSubmit = (values: APISiteAuthPermission.Former) => {
+  const onSubmit = (values: APISiteManagementPermission.Former) => {
     const uri: string[] | undefined = values.uri?.split('|');
 
-    const params: APISiteAuthPermission.Editor = {
+    const params: APISiteManagementPermission.Editor = {
       module: props.module,
       parent: values.parent ? values.parent[values.parent?.length - 1] : undefined,
       name: values.name,
@@ -95,7 +95,7 @@ const Editor: React.FC<APISiteAuthPermission.Props> = (props) => {
   };
 
   const toInit = () => {
-    const data: APISiteAuthPermission.Former = {
+    const data: APISiteManagementPermission.Former = {
       parent: [],
       name: '',
       slug: '',

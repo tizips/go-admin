@@ -1,7 +1,7 @@
-declare namespace APISiteAuthAdmin {
+declare namespace APISiteManagementAdmin {
   type Props = {
     visible?: boolean;
-    params?: APISiteAuthAdmins.Data;
+    params?: APISiteManagementAdmins.Data;
     onCreate?: () => void;
     onUpdate?: () => void;
     onSave?: () => void;

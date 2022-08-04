@@ -1,7 +1,7 @@
-declare namespace APISiteAuthPermission {
+declare namespace APISiteManagementPermission {
   type Props = {
     visible?: boolean;
-    params?: APISiteAuthPermissions.Data;
+    params?: APISiteManagementPermissions.Data;
     methods?: any;
     module?: number;
     onCreate?: () => void;
