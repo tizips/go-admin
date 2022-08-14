@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Button, Card, Col, notification, Popconfirm, Row, Table, Tag, Tooltip } from 'antd';
 import Constants from '@/utils/Constants';
 import moment from 'moment';
-import { FormOutlined, RedoOutlined } from '@ant-design/icons';
+import { DeploymentUnitOutlined, RedoOutlined } from '@ant-design/icons';
 import Create from '@/pages/Dormitory/Asset/Grant/Create';
 import { doPaginate, doRevoke } from './service';
 import Loop from '@/utils/Loop';
@@ -93,8 +93,8 @@ const Paginate: React.FC = () => {
             </Col>
             <Authorize permission="dormitory.asset.grant.create">
               <Col>
-                <Tooltip title="创建">
-                  <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
+                <Tooltip title="派发">
+                  <Button type="primary" icon={<DeploymentUnitOutlined />} onClick={onCreate} />
                 </Tooltip>
               </Col>
             </Authorize>

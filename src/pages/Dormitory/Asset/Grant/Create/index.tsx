@@ -16,40 +16,27 @@ import Loop from '@/utils/Loop';
 import Pattern from '@/utils/Pattern';
 
 const Create: React.FC<APIDormitoryAssetGrant.Props> = (props) => {
-  const init: APIDormitoryAssetGrant.Former = {
-    object: 'package',
-    package: undefined,
-    device: undefined,
-    position: 'positions',
-    positions: undefined,
-    type: undefined,
-    number: undefined,
-    remark: '',
-  };
-
-  const [former] = Form.useForm();
+  const [former] = Form.useForm<APIDormitoryAssetGrant.Former>();
   const [loading, setLoading] = useState<APIDormitoryAssetGrant.Loading>({});
   const [devices, setDevices] = useState<APIData.Tree[]>([]);
   const [packages, setPackages] = useState<APIData.Online[]>([]);
   const [positions, setPositions] = useState<APIData.Tree[]>([]);
   const [types, setTypes] = useState<APIData.Tree[]>([]);
-  const [position, setPosition] = useState(init.position);
-  const [object, setObject] = useState(init.object);
+
+  const position = Form.useWatch('position', former);
+  const object = Form.useWatch('object', former);
 
   const toTypesByOnline = () => {
     setLoading({ ...loading, buildings: true });
     doTypeByOnline({ with_bed: true, must_bed: true })
       .then((response: APIResponse.Response<APIDormitory.TypeOnline[]>) => {
         if (response.code == Constants.Success) {
-          const data: APIData.Tree[] = [];
-          response.data.forEach((item) =>
-            data.push({
-              id: item.id,
-              object: 'type',
-              name: item.name,
-              children: item.beds,
-            }),
-          );
+          const data: APIData.Tree[] = response.data.map((item) => ({
+            id: item.id,
+            object: 'type',
+            name: item.name,
+            children: item.beds,
+          }));
           setTypes(data);
         }
       })
@@ -209,7 +196,14 @@ const Create: React.FC<APIDormitoryAssetGrant.Props> = (props) => {
       params.device = values.device[values.device.length - 1];
     if (values.number) params.number = parseInt(values.number, 10);
 
-    if (values.type && values.type.length >= 2) params.type = values.type[values.type.length - 1];
+    if (values.types && values.types.length > 0) {
+      values.positions = [];
+      values.types.forEach((item) => {
+        if (item.length >= 2) params.types?.push({ object: 'bed', id: item[1] });
+        else if (item.length >= 1) params.types?.push({ object: 'type', id: item[0] });
+      });
+    }
+
     if (values.positions) {
       params.positions = [];
       values.positions.forEach((item) => {
@@ -220,6 +214,7 @@ const Create: React.FC<APIDormitoryAssetGrant.Props> = (props) => {
       });
     }
 
+    console.info(params);
     toCreate(params);
   };
 
@@ -240,10 +235,16 @@ const Create: React.FC<APIDormitoryAssetGrant.Props> = (props) => {
   };
 
   const toInit = () => {
-    setObject(init.object);
-    setPosition(init.position);
-
-    former.setFieldsValue(init);
+    former.setFieldsValue({
+      object: 'package',
+      package: undefined,
+      device: undefined,
+      position: 'positions',
+      positions: undefined,
+      types: [],
+      number: undefined,
+      remark: '',
+    });
   };
 
   useEffect(() => {
@@ -252,7 +253,7 @@ const Create: React.FC<APIDormitoryAssetGrant.Props> = (props) => {
 
   useEffect(() => {
     if (props.visible && position == 'positions' && positions.length <= 0) toBuildingsByOnline();
-    else if (props.visible && position == 'type' && types.length <= 0) toTypesByOnline();
+    else if (props.visible && position == 'types' && types.length <= 0) toTypesByOnline();
   }, [props.visible, position]);
 
   useEffect(() => {
@@ -271,9 +272,9 @@ const Create: React.FC<APIDormitoryAssetGrant.Props> = (props) => {
       onCancel={props.onCancel}
       confirmLoading={loading.confirmed}
     >
-      <Form form={former} initialValues={init} onFinish={onSubmit}>
+      <Form form={former} onFinish={onSubmit}>
         <Form.Item label="类型" name="object" required>
-          <Select onChange={(value) => setObject(value)}>
+          <Select>
             <Select.Option value="package">套餐</Select.Option>
             <Select.Option value="device">设备</Select.Option>
           </Select>
@@ -317,37 +318,36 @@ const Create: React.FC<APIDormitoryAssetGrant.Props> = (props) => {
         <Form.Item label="位置" required>
           <Input.Group compact>
             <Form.Item noStyle name="position">
-              <Select
-                value={position}
-                onChange={(value) => setPosition(value)}
-                style={{ width: '40%' }}
-              >
+              <Select style={{ width: position == 'live' ? '100%' : '40%' }}>
                 <Select.Option value="positions">位置</Select.Option>
-                <Select.Option value="type">房型</Select.Option>
+                <Select.Option value="types">房型</Select.Option>
+                <Select.Option value="live">在住人员</Select.Option>
               </Select>
             </Form.Item>
-            {position === 'positions' ? (
-              <Form.Item label="位置" noStyle name="positions" rules={[{ required: true }]}>
-                <Cascader
-                  options={positions}
-                  multiple
-                  maxTagCount="responsive"
-                  loadData={onPositions}
-                  fieldNames={{ label: 'name', value: 'id' }}
-                  placeholder="请选择分发楼栋"
-                  style={{ width: '60%' }}
-                />
-              </Form.Item>
-            ) : (
-              <Form.Item label="房型" noStyle name="type" rules={[{ required: true }]}>
-                <Cascader
-                  options={types}
-                  fieldNames={{ label: 'name', value: 'id' }}
-                  placeholder="请选择分发房型位置"
-                  style={{ width: '60%' }}
-                />
-              </Form.Item>
-            )}
+            {position !== 'live' &&
+              (position === 'positions' ? (
+                <Form.Item label="位置" noStyle name="positions" rules={[{ required: true }]}>
+                  <Cascader
+                    options={positions}
+                    multiple
+                    maxTagCount="responsive"
+                    loadData={onPositions}
+                    fieldNames={{ label: 'name', value: 'id' }}
+                    placeholder="请选择分发楼栋"
+                    style={{ width: '60%' }}
+                  />
+                </Form.Item>
+              ) : (
+                <Form.Item label="房型" noStyle name="types" rules={[{ required: true }]}>
+                  <Cascader
+                    options={types}
+                    multiple
+                    fieldNames={{ label: 'name', value: 'id' }}
+                    placeholder="请选择分发房型位置"
+                    style={{ width: '60%' }}
+                  />
+                </Form.Item>
+              ))}
           </Input.Group>
         </Form.Item>
         <Form.Item label="备注" name="remark" rules={[{ required: true }, { max: 255 }]}>

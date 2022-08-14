@@ -13,9 +13,9 @@ declare namespace APIDormitoryAssetGrant {
     package?: number;
     device?: number;
     number?: number;
-    position?: 'type' | 'positions';
+    position?: 'types' | 'positions' | 'live';
     positions?: { object?: string; id?: number }[];
-    type?: number;
+    types?: { object?: string; id?: number }[];
     remark?: string;
   };
 
@@ -24,9 +24,9 @@ declare namespace APIDormitoryAssetGrant {
     package?: number;
     device?: number[];
     number?: string;
-    position?: 'type' | 'positions';
+    position?: 'types' | 'positions' | 'live';
     positions?: number[][];
-    type?: number[];
+    types?: number[][];
     remark?: string;
   };
 

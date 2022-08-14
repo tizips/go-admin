@@ -108,7 +108,7 @@ const errorHandler = (error: ResponseError) => {
    */
   if (response.status === 401) {
     if (localStorage.getItem(Constants.Authorization)) localStorage.clear();
-    history.push(Constants.PathLogin);
+    // history.push(Constants.PathLogin);
   } else if (response.status === 403) {
     history.push('/403');
     return response;
