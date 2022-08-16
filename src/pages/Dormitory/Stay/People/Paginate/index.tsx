@@ -8,8 +8,8 @@ import {
   Input,
   notification,
   Popconfirm,
-  Row,
   Select,
+  Space,
   Table,
   Tag,
   Tooltip,
@@ -26,7 +26,7 @@ import Authorize from '@/components/Basic/Authorize';
 const Paginate: React.FC = () => {
   const [filter, setFilter] = useState<APIDormitoryStayPeoples.Filter>({});
   const [search, setSearch] = useState<APIDormitoryStayPeoples.Search>({ status: 'live' });
-  const [loadingPaginate, setLoadingPaginate] = useState(false);
+  const [load, setLoad] = useState(false);
   const [visible, setVisible] = useState<APIDormitoryStayPeoples.Visible>({});
   const [buildings, setBuildings] = useState<APIData.Online[]>([]);
   const [positions, setPositions] = useState<APIData.Tree[]>([]);
@@ -67,7 +67,7 @@ const Paginate: React.FC = () => {
   };
 
   const toPaginate = () => {
-    setLoadingPaginate(true);
+    setLoad(true);
     doPaginate(search)
       .then((response: APIResponse.Paginate<APIDormitoryStayPeoples.Data[]>) => {
         if (response.code === Constants.Success) {
@@ -82,7 +82,7 @@ const Paginate: React.FC = () => {
           setExpands(ids);
         }
       })
-      .finally(() => setLoadingPaginate(false));
+      .finally(() => setLoad(false));
   };
 
   const onDelete = (record: APIDormitoryStayPeoples.Data) => {
@@ -208,68 +208,53 @@ const Paginate: React.FC = () => {
       <Card
         title="人员列表"
         extra={
-          <Row gutter={[10, 10]} justify="end">
-            <Col>
-              <Cascader
-                options={positions}
-                loadData={onPositions}
-                onChange={onChangePosition}
-                fieldNames={{ label: 'name', value: 'id' }}
-                changeOnSelect
-                placeholder="位置选择"
-              />
-            </Col>
-            <Col>
+          <Space size={[10, 10]} wrap>
+            <Cascader
+              options={positions}
+              loadData={onPositions}
+              onChange={onChangePosition}
+              fieldNames={{ label: 'name', value: 'id' }}
+              changeOnSelect
+              placeholder="位置选择"
+            />
+            <Select
+              placeholder="临时"
+              allowClear
+              onChange={(is_temp) => setSearch({ ...search, is_temp, page: undefined })}
+            >
+              <Select.Option value={1}>是</Select.Option>
+              <Select.Option value={2}>否</Select.Option>
+            </Select>
+            <Select
+              value={search.status}
+              placeholder="状态"
+              onChange={(status) => setSearch({ ...search, status, page: undefined })}
+            >
+              <Select.Option value="live">在住</Select.Option>
+              <Select.Option value="leave">离宿</Select.Option>
+            </Select>
+            <Input.Group compact>
               <Select
-                placeholder="临时"
+                value={filter.type || 'name'}
+                style={{ width: '30%' }}
+                onChange={(type) => setFilter({ ...filter, type })}
+              >
+                <Select.Option value="name">姓名</Select.Option>
+                <Select.Option value="mobile">电话</Select.Option>
+                <Select.Option value="room">房号</Select.Option>
+              </Select>
+              <Input.Search
                 allowClear
-                onChange={(is_temp) => setSearch({ ...search, is_temp, page: undefined })}
-              >
-                <Select.Option value={1}>是</Select.Option>
-                <Select.Option value={2}>否</Select.Option>
-              </Select>
-            </Col>
-            <Col>
-              <Select
-                value={search.status}
-                placeholder="状态"
-                onChange={(status) => setSearch({ ...search, status, page: undefined })}
-              >
-                <Select.Option value="live">在住</Select.Option>
-                <Select.Option value="leave">离宿</Select.Option>
-              </Select>
-            </Col>
-            <Col>
-              <Input.Group compact>
-                <Select
-                  value={filter.type || 'name'}
-                  style={{ width: '30%' }}
-                  onChange={(type) => setFilter({ ...filter, type })}
-                >
-                  <Select.Option value="name">姓名</Select.Option>
-                  <Select.Option value="mobile">电话</Select.Option>
-                  <Select.Option value="room">房号</Select.Option>
-                </Select>
-                <Input.Search
-                  allowClear
-                  enterButton
-                  style={{ width: '70%' }}
-                  onSearch={(keyword) =>
-                    setSearch({ ...search, type: filter.type, keyword, page: undefined })
-                  }
-                />
-              </Input.Group>
-            </Col>
-            <Col>
-              <Tooltip title="刷新">
-                <Button
-                  type="primary"
-                  icon={<RedoOutlined />}
-                  onClick={toPaginate}
-                  loading={loadingPaginate}
-                />
-              </Tooltip>
-            </Col>
+                enterButton
+                style={{ width: '70%' }}
+                onSearch={(keyword) =>
+                  setSearch({ ...search, type: filter.type, keyword, page: undefined })
+                }
+              />
+            </Input.Group>
+            <Tooltip title="刷新">
+              <Button type="primary" icon={<RedoOutlined />} onClick={toPaginate} loading={load} />
+            </Tooltip>
             <Authorize permission="dormitory.basic.bed.create">
               <Col>
                 <Tooltip title="创建">
@@ -277,13 +262,13 @@ const Paginate: React.FC = () => {
                 </Tooltip>
               </Col>
             </Authorize>
-          </Row>
+          </Space>
         }
       >
         <Table
           dataSource={data}
           rowKey="id"
-          loading={loadingPaginate}
+          loading={load}
           expandable={{
             expandIcon: () => <VerticalLeftOutlined style={{ color: '#1890ff' }} />,
             expandedRowKeys: expands,

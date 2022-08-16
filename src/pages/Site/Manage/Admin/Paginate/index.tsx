@@ -1,21 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Button,
-  Card,
-  Col,
-  notification,
-  Popconfirm,
-  Row,
-  Switch,
-  Table,
-  Tag,
-  Tooltip,
-} from 'antd';
+import { Button, Card, notification, Popconfirm, Space, Switch, Table, Tag, Tooltip } from 'antd';
 import Constants from '@/utils/Constants';
 import moment from 'moment';
 import { FormOutlined, RedoOutlined } from '@ant-design/icons';
 import { useModel } from 'umi';
-import Editor from '@/pages/Site/Management/Admin/Editor';
+import Editor from '@/pages/Site/Manage/Admin/Editor';
 import { doDelete, doEnable, doPaginate } from './service';
 import Loop from '@/utils/Loop';
 import Authorize from '@/components/Basic/Authorize';
@@ -24,17 +13,17 @@ import Enable from '@/components/Basic/Enable';
 const Paginate: React.FC = () => {
   const { initialState } = useModel('@@initialState');
 
-  const [search, setSearch] = useState<APISiteManagementAdmins.Search>({});
-  const [editor, setEditor] = useState<APISiteManagementAdmins.Data | undefined>();
-  const [loadingPaginate, setLoadingPaginate] = useState(false);
-  const [visible, setVisible] = useState<APISiteManagementAdmins.Visible>({});
-  const [data, setData] = useState<APISiteManagementAdmins.Data[]>();
+  const [search, setSearch] = useState<APISiteManageAdmins.Search>({});
+  const [editor, setEditor] = useState<APISiteManageAdmins.Data | undefined>();
+  const [load, setLoad] = useState(false);
+  const [visible, setVisible] = useState<APISiteManageAdmins.Visible>({});
+  const [data, setData] = useState<APISiteManageAdmins.Data[]>();
   const [paginate, setPaginate] = useState<APIData.Paginate>({});
 
   const toPaginate = () => {
-    setLoadingPaginate(true);
+    setLoad(true);
     doPaginate(search)
-      .then((response: APIResponse.Paginate<APISiteManagementAdmins.Data[]>) => {
+      .then((response: APIResponse.Paginate<APISiteManageAdmins.Data[]>) => {
         if (response.code === Constants.Success) {
           setPaginate({
             size: response.data.size,
@@ -44,17 +33,13 @@ const Paginate: React.FC = () => {
           setData(response.data.data || []);
         }
       })
-      .finally(() => setLoadingPaginate(false));
+      .finally(() => setLoad(false));
   };
 
-  const onEnable = (record: APISiteManagementAdmins.Data) => {
+  const onEnable = (record: APISiteManageAdmins.Data) => {
     if (data) {
-      const temp: APISiteManagementAdmins.Data[] = [...data];
-      Loop.ById(
-        temp,
-        record.id,
-        (item: APISiteManagementAdmins.Data) => (item.loading_enable = true),
-      );
+      const temp: APISiteManageAdmins.Data[] = [...data];
+      Loop.ById(temp, record.id, (item: APISiteManageAdmins.Data) => (item.loading_enable = true));
       setData(temp);
     }
 
@@ -84,14 +69,10 @@ const Paginate: React.FC = () => {
       });
   };
 
-  const onDelete = (record: APISiteManagementAdmins.Data) => {
+  const onDelete = (record: APISiteManageAdmins.Data) => {
     if (data) {
       const temp = [...data];
-      Loop.ById(
-        temp,
-        record.id,
-        (item: APISiteManagementAdmins.Data) => (item.loading_deleted = true),
-      );
+      Loop.ById(temp, record.id, (item: APISiteManageAdmins.Data) => (item.loading_deleted = true));
       setData(temp);
     }
 
@@ -118,7 +99,7 @@ const Paginate: React.FC = () => {
     setVisible({ ...visible, editor: true });
   };
 
-  const onUpdate = (record: APISiteManagementAdmins.Data) => {
+  const onUpdate = (record: APISiteManageAdmins.Data) => {
     setEditor(record);
     setVisible({ ...visible, editor: true });
   };
@@ -141,31 +122,22 @@ const Paginate: React.FC = () => {
       <Card
         title="账号列表"
         extra={
-          <Row gutter={10}>
-            <Col>
-              <Tooltip title="刷新">
-                <Button
-                  type="primary"
-                  icon={<RedoOutlined />}
-                  onClick={toPaginate}
-                  loading={loadingPaginate}
-                />
+          <Space size={[10, 10]} wrap>
+            <Tooltip title="刷新">
+              <Button type="primary" icon={<RedoOutlined />} onClick={toPaginate} loading={load} />
+            </Tooltip>
+            <Authorize permission="site.manage.admin.create">
+              <Tooltip title="创建">
+                <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
               </Tooltip>
-            </Col>
-            <Authorize permission="site.management.admin.create">
-              <Col>
-                <Tooltip title="创建">
-                  <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
-                </Tooltip>
-              </Col>
             </Authorize>
-          </Row>
+          </Space>
         }
       >
         <Table
           dataSource={data}
           rowKey="id"
-          loading={loadingPaginate}
+          loading={load}
           pagination={{
             current: paginate.page,
             pageSize: paginate.size,
@@ -176,13 +148,13 @@ const Paginate: React.FC = () => {
           <Table.Column title="名称" dataIndex="nickname" />
           <Table.Column
             title="登陆名"
-            render={(record: APISiteManagementAdmins.Data) => (
+            render={(record: APISiteManageAdmins.Data) => (
               <span style={{ color: initialState?.settings?.primaryColor }}>{record.username}</span>
             )}
           />
           <Table.Column
             title="角色"
-            render={(record: APISiteManagementAdmins.Data) =>
+            render={(record: APISiteManageAdmins.Data) =>
               record.roles?.map((item) => (
                 <Tag key={item.id} color={initialState?.settings?.primaryColor}>
                   {item.name}
@@ -193,9 +165,9 @@ const Paginate: React.FC = () => {
           <Table.Column
             title="启用"
             align="center"
-            render={(record: APISiteManagementAdmins.Data) => (
+            render={(record: APISiteManageAdmins.Data) => (
               <Authorize
-                permission="site.management.admin.enable"
+                permission="site.manage.admin.enable"
                 fallback={<Enable is_enable={record.is_enable} />}
               >
                 <Switch
@@ -209,21 +181,21 @@ const Paginate: React.FC = () => {
           />
           <Table.Column
             title="创建时间"
-            render={(record: APISiteManagementAdmins.Data) =>
+            render={(record: APISiteManageAdmins.Data) =>
               record.created_at && moment(record.created_at).format('YYYY/MM/DD')
             }
           />
           <Table.Column
             align="center"
             width={100}
-            render={(record: APISiteManagementAdmins.Data) => (
+            render={(record: APISiteManageAdmins.Data) => (
               <>
-                <Authorize permission="site.management.admin.update">
+                <Authorize permission="site.manage.admin.update">
                   <Button type="link" onClick={() => onUpdate(record)}>
                     编辑
                   </Button>
                 </Authorize>
-                <Authorize permission="site.management.admin.delete">
+                <Authorize permission="site.manage.admin.delete">
                   <Popconfirm
                     title="确定要删除该数据?"
                     placement="leftTop"

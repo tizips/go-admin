@@ -1,16 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Button,
-  Card,
-  Col,
-  notification,
-  Popconfirm,
-  Row,
-  Switch,
-  Table,
-  Tag,
-  Tooltip,
-} from 'antd';
+import { Button, Card, notification, Popconfirm, Space, Switch, Table, Tag, Tooltip } from 'antd';
 import Constants from '@/utils/Constants';
 import { FormOutlined, RedoOutlined } from '@ant-design/icons';
 import { useModel } from 'umi';
@@ -24,19 +13,19 @@ const Tree: React.FC = () => {
   const { initialState } = useModel('@@initialState');
 
   const [editor, setEditor] = useState<APISiteArchitectureModules.Data | undefined>();
-  const [loadingPaginate, setLoadingPaginate] = useState(false);
+  const [load, setLoad] = useState(false);
   const [visible, setVisible] = useState<APISiteArchitectureModules.Visible>({});
   const [data, setData] = useState<APISiteArchitectureModules.Data[]>();
 
   const toList = () => {
-    setLoadingPaginate(true);
+    setLoad(true);
     doList()
       .then((response: APIResponse.Response<APISiteArchitectureModules.Data[]>) => {
         if (response.code === Constants.Success) {
           setData(response.data);
         }
       })
-      .finally(() => setLoadingPaginate(false));
+      .finally(() => setLoad(false));
   };
 
   const onDelete = (record: APISiteArchitectureModules.Data) => {
@@ -145,34 +134,19 @@ const Tree: React.FC = () => {
       <Card
         title="模块列表"
         extra={
-          <Row gutter={10}>
-            <Col>
-              <Tooltip title="刷新">
-                <Button
-                  type="primary"
-                  icon={<RedoOutlined />}
-                  onClick={toList}
-                  loading={loadingPaginate}
-                />
-              </Tooltip>
-            </Col>
+          <Space size={[10, 10]} wrap>
+            <Tooltip title="刷新">
+              <Button type="primary" icon={<RedoOutlined />} onClick={toList} loading={load} />
+            </Tooltip>
             <Authorize permission="site.architecture.module.create">
-              <Col>
-                <Tooltip title="创建">
-                  <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
-                </Tooltip>
-              </Col>
+              <Tooltip title="创建">
+                <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
+              </Tooltip>
             </Authorize>
-          </Row>
+          </Space>
         }
       >
-        <Table
-          dataSource={data}
-          rowKey="id"
-          size="small"
-          loading={loadingPaginate}
-          pagination={false}
-        >
+        <Table dataSource={data} rowKey="id" size="small" loading={load} pagination={false}>
           <Table.Column title="名称" dataIndex="name" />
           <Table.Column
             title="标示"

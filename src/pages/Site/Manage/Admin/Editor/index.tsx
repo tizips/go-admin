@@ -6,17 +6,17 @@ import Pattern from '@/utils/Pattern';
 import { useModel } from 'umi';
 import { doRoleByEnable } from '@/services/site';
 
-const Editor: React.FC<APISiteManagementAdmin.Props> = (props) => {
+const Editor: React.FC<APISiteManageAdmin.Props> = (props) => {
   const { initialState } = useModel('@@initialState');
 
-  const [former] = Form.useForm<APISiteManagementAdmin.Former>();
+  const [former] = Form.useForm<APISiteManageAdmin.Former>();
   const [roles, setRoles] = useState<APIData.Online[]>([]);
-  const [loading, setLoading] = useState<APISiteManagementAdmin.Loading>({});
+  const [loading, setLoading] = useState<APISiteManageAdmin.Loading>({});
 
   const toPermissions = () => {
     setLoading({ ...loading, permission: true });
     doRoleByEnable()
-      .then((response: APIResponse.Response<APISiteManagementAdmin.Role[]>) => {
+      .then((response: APIResponse.Response<APISiteManageAdmin.Role[]>) => {
         if (response.code === Constants.Success) {
           setRoles(response.data);
         }
@@ -56,8 +56,8 @@ const Editor: React.FC<APISiteManagementAdmin.Props> = (props) => {
       .finally(() => setLoading({ ...loading, confirmed: false }));
   };
 
-  const onSubmit = (values: APISiteManagementAdmin.Former) => {
-    const params: APISiteManagementAdmin.Editor = {
+  const onSubmit = (values: APISiteManageAdmin.Former) => {
+    const params: APISiteManageAdmin.Editor = {
       username: values.username,
       nickname: values.nickname,
       mobile: values.mobile,
@@ -71,7 +71,7 @@ const Editor: React.FC<APISiteManagementAdmin.Props> = (props) => {
   };
 
   const toInit = () => {
-    const data: APISiteManagementAdmin.Former = {
+    const data: APISiteManageAdmin.Former = {
       username: '',
       nickname: '',
       mobile: '',

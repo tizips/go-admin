@@ -1,7 +1,7 @@
-declare namespace APISiteManagementRole {
+declare namespace APISiteManageRole {
   type Props = {
     visible?: boolean;
-    params?: APISiteManagementRoles.Data;
+    params?: APISiteManageRoles.Data;
     onCreate?: () => void;
     onUpdate?: () => void;
     onSave?: () => void;

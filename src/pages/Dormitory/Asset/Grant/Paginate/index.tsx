@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Card, Col, notification, Popconfirm, Row, Table, Tag, Tooltip } from 'antd';
+import { Button, Card, notification, Popconfirm, Space, Table, Tag, Tooltip } from 'antd';
 import Constants from '@/utils/Constants';
 import moment from 'moment';
 import { DeploymentUnitOutlined, RedoOutlined } from '@ant-design/icons';
@@ -11,13 +11,13 @@ import Authorize from '@/components/Basic/Authorize';
 const Paginate: React.FC = () => {
   const [editor, setEditor] = useState<APIDormitoryAssetGrants.Data | undefined>();
   const [search, setSearch] = useState<APIDormitoryAssetGrants.Search>({});
-  const [loadingPaginate, setLoadingPaginate] = useState(false);
+  const [load, setLoad] = useState(false);
   const [visible, setVisible] = useState<APIDormitoryAssetGrants.Visible>({});
   const [data, setData] = useState<APIDormitoryAssetGrants.Data[]>();
   const [paginate, setPaginate] = useState<APIData.Paginate>({});
 
   const toPaginate = () => {
-    setLoadingPaginate(true);
+    setLoad(true);
     doPaginate(search)
       .then((response: APIResponse.Paginate<APIDormitoryAssetGrants.Data[]>) => {
         if (response.code === Constants.Success) {
@@ -29,7 +29,7 @@ const Paginate: React.FC = () => {
           setData(response.data.data || []);
         }
       })
-      .finally(() => setLoadingPaginate(false));
+      .finally(() => setLoad(false));
   };
 
   const onRevoke = (record: APIDormitoryAssetGrants.Data) => {
@@ -80,31 +80,22 @@ const Paginate: React.FC = () => {
       <Card
         title="发放记录"
         extra={
-          <Row gutter={[10, 10]} justify="end">
-            <Col>
-              <Tooltip title="刷新">
-                <Button
-                  type="primary"
-                  icon={<RedoOutlined />}
-                  onClick={toPaginate}
-                  loading={loadingPaginate}
-                />
-              </Tooltip>
-            </Col>
+          <Space size={[10, 10]} wrap>
+            <Tooltip title="刷新">
+              <Button type="primary" icon={<RedoOutlined />} onClick={toPaginate} loading={load} />
+            </Tooltip>
             <Authorize permission="dormitory.asset.grant.create">
-              <Col>
-                <Tooltip title="派发">
-                  <Button type="primary" icon={<DeploymentUnitOutlined />} onClick={onCreate} />
-                </Tooltip>
-              </Col>
+              <Tooltip title="派发">
+                <Button type="primary" icon={<DeploymentUnitOutlined />} onClick={onCreate} />
+              </Tooltip>
             </Authorize>
-          </Row>
+          </Space>
         }
       >
         <Table
           dataSource={data}
           rowKey="id"
-          loading={loadingPaginate}
+          loading={load}
           pagination={{
             pageSize: paginate.size,
             current: paginate.page,

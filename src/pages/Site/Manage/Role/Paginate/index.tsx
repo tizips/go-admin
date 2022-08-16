@@ -1,25 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Card, Col, notification, Popconfirm, Row, Table, Tooltip } from 'antd';
+import { Button, Card, notification, Popconfirm, Space, Table, Tooltip } from 'antd';
 import Constants from '@/utils/Constants';
 import moment from 'moment';
 import { FormOutlined, RedoOutlined } from '@ant-design/icons';
-import Editor from '@/pages/Site/Management/Role/Editor';
+import Editor from '@/pages/Site/Manage/Role/Editor';
 import { doDelete, doPaginate } from './service';
 import Loop from '@/utils/Loop';
 import Authorize from '@/components/Basic/Authorize';
 
 const Paginate: React.FC = () => {
-  const [search, setSearch] = useState<APISiteManagementRoles.Search>({});
-  const [editor, setEditor] = useState<APISiteManagementRoles.Data | undefined>();
-  const [loadingPaginate, setLoadingPaginate] = useState(false);
-  const [visible, setVisible] = useState<APISiteManagementRoles.Visible>({});
-  const [data, setData] = useState<APISiteManagementRoles.Data[]>();
+  const [search, setSearch] = useState<APISiteManageRoles.Search>({});
+  const [editor, setEditor] = useState<APISiteManageRoles.Data | undefined>();
+  const [load, setLoad] = useState(false);
+  const [visible, setVisible] = useState<APISiteManageRoles.Visible>({});
+  const [data, setData] = useState<APISiteManageRoles.Data[]>();
   const [paginate, setPaginate] = useState<APIData.Paginate>({});
 
   const toPaginate = () => {
-    setLoadingPaginate(true);
+    setLoad(true);
     doPaginate(search)
-      .then((response: APIResponse.Paginate<APISiteManagementRoles.Data[]>) => {
+      .then((response: APIResponse.Paginate<APISiteManageRoles.Data[]>) => {
         if (response.code === Constants.Success) {
           setPaginate({
             size: response.data.size,
@@ -29,12 +29,12 @@ const Paginate: React.FC = () => {
           setData(response.data.data);
         }
       })
-      .finally(() => setLoadingPaginate(false));
+      .finally(() => setLoad(false));
   };
 
-  const onDelete = (record: APISiteManagementRoles.Data) => {
+  const onDelete = (record: APISiteManageRoles.Data) => {
     if (data) {
-      const temp: APISiteManagementRoles.Data[] = [...data];
+      const temp: APISiteManageRoles.Data[] = [...data];
       Loop.ById(temp, record.id, (item) => (item.loading_deleted = true));
       setData(temp);
     }
@@ -62,7 +62,7 @@ const Paginate: React.FC = () => {
     setVisible({ ...visible, editor: true });
   };
 
-  const onUpdate = (record: APISiteManagementRoles.Data) => {
+  const onUpdate = (record: APISiteManageRoles.Data) => {
     setEditor(record);
     setVisible({ ...visible, editor: true });
   };
@@ -85,31 +85,22 @@ const Paginate: React.FC = () => {
       <Card
         title="角色列表"
         extra={
-          <Row gutter={10}>
-            <Col>
-              <Tooltip title="刷新">
-                <Button
-                  type="primary"
-                  icon={<RedoOutlined />}
-                  onClick={toPaginate}
-                  loading={loadingPaginate}
-                />
+          <Space size={[10, 10]} wrap>
+            <Tooltip title="刷新">
+              <Button type="primary" icon={<RedoOutlined />} onClick={toPaginate} loading={load} />
+            </Tooltip>
+            <Authorize permission="site.manage.role.create">
+              <Tooltip title="创建">
+                <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
               </Tooltip>
-            </Col>
-            <Authorize permission="site.management.role.create">
-              <Col>
-                <Tooltip title="创建">
-                  <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
-                </Tooltip>
-              </Col>
             </Authorize>
-          </Row>
+          </Space>
         }
       >
         <Table
           dataSource={data}
           rowKey="id"
-          loading={loadingPaginate}
+          loading={load}
           pagination={{
             current: paginate.page,
             pageSize: paginate.size,
@@ -121,7 +112,7 @@ const Paginate: React.FC = () => {
           <Table.Column title="简介" dataIndex="summary" />
           <Table.Column
             title="创建时间"
-            render={(record: APISiteManagementRoles.Data) =>
+            render={(record: APISiteManageRoles.Data) =>
               record.created_at && moment(record.created_at).format('YYYY/MM/DD')
             }
           />
@@ -129,14 +120,14 @@ const Paginate: React.FC = () => {
             title="操作"
             align="center"
             width={100}
-            render={(record: APISiteManagementRoles.Data) => (
+            render={(record: APISiteManageRoles.Data) => (
               <>
-                <Authorize permission="site.management.role.update">
+                <Authorize permission="site.manage.role.update">
                   <Button type="link" onClick={() => onUpdate(record)}>
                     编辑
                   </Button>
                 </Authorize>
-                <Authorize permission="site.management.role.delete">
+                <Authorize permission="site.manage.role.delete">
                   <Popconfirm
                     title="确定要删除该数据?"
                     placement="leftTop"

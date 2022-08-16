@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Card, Col, Input, notification, Popconfirm, Row, Table, Tag, Tooltip } from 'antd';
+import { Button, Card, Input, notification, Popconfirm, Space, Table, Tag, Tooltip } from 'antd';
 import Constants from '@/utils/Constants';
 import moment from 'moment';
 import { FormOutlined, RedoOutlined } from '@ant-design/icons';
@@ -11,13 +11,13 @@ import Authorize from '@/components/Basic/Authorize';
 const Paginate: React.FC = () => {
   const [editor, setEditor] = useState<APIDormitoryAssetPackages.Data | undefined>();
   const [search, setSearch] = useState<APIDormitoryAssetPackages.Search>({});
-  const [loadingPaginate, setLoadingPaginate] = useState(false);
+  const [load, setLoad] = useState(false);
   const [visible, setVisible] = useState<APIDormitoryAssetPackages.Visible>({});
   const [data, setData] = useState<APIDormitoryAssetPackages.Data[]>();
   const [paginate, setPaginate] = useState<APIData.Paginate>({});
 
   const toPaginate = () => {
-    setLoadingPaginate(true);
+    setLoad(true);
     doPaginate(search)
       .then((response: APIResponse.Paginate<APIDormitoryAssetPackages.Data[]>) => {
         if (response.code === Constants.Success) {
@@ -29,7 +29,7 @@ const Paginate: React.FC = () => {
           setData(response.data.data || []);
         }
       })
-      .finally(() => setLoadingPaginate(false));
+      .finally(() => setLoad(false));
   };
 
   const onDelete = (record: APIDormitoryAssetPackages.Data) => {
@@ -86,38 +86,27 @@ const Paginate: React.FC = () => {
       <Card
         title="打包列表"
         extra={
-          <Row gutter={[10, 10]} justify="end">
-            <Col>
-              <Input.Search
-                allowClear
-                enterButton
-                onSearch={(keyword) => setSearch({ ...search, keyword, page: undefined })}
-              />
-            </Col>
-            <Col>
-              <Tooltip title="刷新">
-                <Button
-                  type="primary"
-                  icon={<RedoOutlined />}
-                  onClick={toPaginate}
-                  loading={loadingPaginate}
-                />
-              </Tooltip>
-            </Col>
+          <Space size={[10, 10]} wrap>
+            <Input.Search
+              allowClear
+              enterButton
+              onSearch={(keyword) => setSearch({ ...search, keyword, page: undefined })}
+            />
+            <Tooltip title="刷新">
+              <Button type="primary" icon={<RedoOutlined />} onClick={toPaginate} loading={load} />
+            </Tooltip>
             <Authorize permission="dormitory.asset.package.create">
-              <Col>
-                <Tooltip title="创建">
-                  <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
-                </Tooltip>
-              </Col>
+              <Tooltip title="创建">
+                <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
+              </Tooltip>
             </Authorize>
-          </Row>
+          </Space>
         }
       >
         <Table
           dataSource={data}
           rowKey="id"
-          loading={loadingPaginate}
+          loading={load}
           pagination={{
             pageSize: paginate.size,
             current: paginate.page,

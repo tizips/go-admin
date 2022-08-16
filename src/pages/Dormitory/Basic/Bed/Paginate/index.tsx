@@ -3,12 +3,11 @@ import {
   Button,
   Card,
   Cascader,
-  Col,
   Input,
   notification,
   Popconfirm,
-  Row,
   Select,
+  Space,
   Switch,
   Table,
   Tag,
@@ -30,7 +29,7 @@ const Paginate: React.FC = () => {
 
   const [search, setSearch] = useState<APIDormitoryBasicBeds.Search>({});
   const [editor, setEditor] = useState<APIDormitoryBasicBeds.Data | undefined>();
-  const [loadingPaginate, setLoadingPaginate] = useState(false);
+  const [load, setLoad] = useState(false);
   const [visible, setVisible] = useState<APIDormitoryBasicBeds.Visible>({});
   const [buildings, setBuildings] = useState<APIData.Online[]>([]);
   const [positions, setPositions] = useState<APIData.Tree[]>([]);
@@ -70,7 +69,7 @@ const Paginate: React.FC = () => {
   };
 
   const toPaginate = () => {
-    setLoadingPaginate(true);
+    setLoad(true);
     doPaginate(search)
       .then((response: APIResponse.Paginate<APIDormitoryBasicBeds.Data[]>) => {
         if (response.code === Constants.Success) {
@@ -82,7 +81,7 @@ const Paginate: React.FC = () => {
           setData(response.data.data || []);
         }
       })
-      .finally(() => setLoadingPaginate(false));
+      .finally(() => setLoad(false));
   };
 
   const onDelete = (record: APIDormitoryBasicBeds.Data) => {
@@ -201,7 +200,7 @@ const Paginate: React.FC = () => {
       <Card
         title="床位列表"
         extra={
-          <Row gutter={[10, 10]} justify="end">
+          <Space size={[10, 10]} wrap>
             <Select
               allowClear
               onChange={(is_public) => setSearch({ ...search, is_public })}
@@ -210,48 +209,35 @@ const Paginate: React.FC = () => {
               <Select.Option value={1}>公共区域</Select.Option>
               <Select.Option value={2}>非公共区域</Select.Option>
             </Select>
-            <Col>
-              <Cascader
-                options={positions}
-                loadData={onPositions}
-                onChange={onChangePosition}
-                fieldNames={{ label: 'name', value: 'id' }}
-                changeOnSelect
-                placeholder="位置选择"
-              />
-            </Col>
-            <Col>
-              <Input.Search
-                onSearch={(bed) => setSearch({ ...search, bed })}
-                allowClear
-                enterButton
-                placeholder="床位号"
-              />
-            </Col>
-            <Col>
-              <Tooltip title="刷新">
-                <Button
-                  type="primary"
-                  icon={<RedoOutlined />}
-                  onClick={toPaginate}
-                  loading={loadingPaginate}
-                />
-              </Tooltip>
-            </Col>
+            <Cascader
+              options={positions}
+              loadData={onPositions}
+              onChange={onChangePosition}
+              fieldNames={{ label: 'name', value: 'id' }}
+              changeOnSelect
+              placeholder="位置选择"
+            />
+            <Input.Search
+              onSearch={(bed) => setSearch({ ...search, bed })}
+              allowClear
+              enterButton
+              placeholder="床位号"
+            />
+            <Tooltip title="刷新">
+              <Button type="primary" icon={<RedoOutlined />} onClick={toPaginate} loading={load} />
+            </Tooltip>
             <Authorize permission="dormitory.basic.bed.create">
-              <Col>
-                <Tooltip title="创建">
-                  <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
-                </Tooltip>
-              </Col>
+              <Tooltip title="创建">
+                <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
+              </Tooltip>
             </Authorize>
-          </Row>
+          </Space>
         }
       >
         <Table
           dataSource={data}
           rowKey="id"
-          loading={loadingPaginate}
+          loading={load}
           pagination={{
             pageSize: paginate.size,
             current: paginate.page,

@@ -2,10 +2,9 @@ import React, { useEffect, useState } from 'react';
 import {
   Button,
   Card,
-  Col,
   notification,
   Popconfirm,
-  Row,
+  Space,
   Switch,
   Table,
   Tabs,
@@ -27,7 +26,7 @@ const List: React.FC = () => {
   const { initialState } = useModel('@@initialState');
 
   const [editor, setEditor] = useState<APIDormitoryBasicFloors.Data | undefined>();
-  const [loading, setLoading] = useState(false);
+  const [load, setLoad] = useState(false);
   const [visible, setVisible] = useState<APIDormitoryBasicFloors.Visible>({});
   const [buildings, setBuildings] = useState<APIData.Online[]>([]);
   const [filter, setFilter] = useState<APIDormitoryBasicFloors.Filter>({});
@@ -45,12 +44,12 @@ const List: React.FC = () => {
   };
 
   const toList = () => {
-    setLoading(true);
+    setLoad(true);
     doList({ building: filter.building })
       .then((response: APIResponse.Response<APIDormitoryBasicFloors.Data[]>) => {
         if (response.code === Constants.Success) setData(response.data || []);
       })
-      .finally(() => setLoading(false));
+      .finally(() => setLoad(false));
   };
 
   const onDelete = (record: APIDormitoryBasicFloors.Data) => {
@@ -145,32 +144,23 @@ const List: React.FC = () => {
           activeKey={`${filter.building}`}
           onChange={(building: any) => setFilter({ ...filter, building })}
           tabBarExtraContent={
-            <Row gutter={10}>
-              <Col>
-                <Tooltip title="刷新">
-                  <Button
-                    type="primary"
-                    icon={<RedoOutlined />}
-                    onClick={toList}
-                    loading={loading}
-                  />
-                </Tooltip>
-              </Col>
+            <Space size={[10, 10]} wrap>
+              <Tooltip title="刷新">
+                <Button type="primary" icon={<RedoOutlined />} onClick={toList} loading={load} />
+              </Tooltip>
               <Authorize permission="dormitory.basic.floor.create">
-                <Col>
-                  <Tooltip title="创建">
-                    <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
-                  </Tooltip>
-                </Col>
+                <Tooltip title="创建">
+                  <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
+                </Tooltip>
               </Authorize>
-            </Row>
+            </Space>
           }
         >
           {buildings.map((item) => (
             <Tabs.TabPane key={item.id} tab={item.name} />
           ))}
         </Tabs>
-        <Table dataSource={data} rowKey="id" loading={loading} pagination={false}>
+        <Table dataSource={data} rowKey="id" loading={load} pagination={false}>
           <Table.Column title="名称" dataIndex="name" />
           <Table.Column title="楼栋" dataIndex="building" />
           <Table.Column

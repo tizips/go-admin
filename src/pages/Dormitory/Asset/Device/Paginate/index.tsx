@@ -2,13 +2,12 @@ import React, { useEffect, useState } from 'react';
 import {
   Button,
   Card,
-  Col,
   Descriptions,
   Input,
   notification,
   Popconfirm,
-  Row,
   Select,
+  Space,
   Table,
   Tooltip,
 } from 'antd';
@@ -24,14 +23,14 @@ const Paginate: React.FC = () => {
   const [editor, setEditor] = useState<APIDormitoryAssetDevices.Data | undefined>();
   const [filter, setFilter] = useState<APIDormitoryAssetDevices.Filter>({});
   const [search, setSearch] = useState<APIDormitoryAssetDevices.Search>({});
-  const [loadingPaginate, setLoadingPaginate] = useState(false);
+  const [load, setLoad] = useState(false);
   const [visible, setVisible] = useState<APIDormitoryAssetDevices.Visible>({});
   const [data, setData] = useState<APIDormitoryAssetDevices.Data[]>();
   const [paginate, setPaginate] = useState<APIData.Paginate>({});
   const [expands, setExpands] = useState<any[]>([]);
 
   const toPaginate = () => {
-    setLoadingPaginate(true);
+    setLoad(true);
     doPaginate(search)
       .then((response: APIResponse.Paginate<APIDormitoryAssetDevices.Data[]>) => {
         if (response.code === Constants.Success) {
@@ -46,7 +45,7 @@ const Paginate: React.FC = () => {
           setExpands(ids);
         }
       })
-      .finally(() => setLoadingPaginate(false));
+      .finally(() => setLoad(false));
   };
 
   const onDelete = (record: APIDormitoryAssetDevices.Data) => {
@@ -126,51 +125,40 @@ const Paginate: React.FC = () => {
       <Card
         title="设备列表"
         extra={
-          <Row gutter={[10, 10]} justify="end">
-            <Col>
-              <Input.Group compact>
-                <Select
-                  value={filter.type || 'name'}
-                  style={{ width: '30%' }}
-                  onChange={(type) => setFilter({ ...filter, type })}
-                >
-                  <Select.Option value="name">名称</Select.Option>
-                  <Select.Option value="no">编号</Select.Option>
-                </Select>
-                <Input.Search
-                  allowClear
-                  enterButton
-                  style={{ width: '70%' }}
-                  onSearch={(keyword) =>
-                    setSearch({ ...search, type: filter.type, keyword, page: undefined })
-                  }
-                />
-              </Input.Group>
-            </Col>
-            <Col>
-              <Tooltip title="刷新">
-                <Button
-                  type="primary"
-                  icon={<RedoOutlined />}
-                  onClick={toPaginate}
-                  loading={loadingPaginate}
-                />
-              </Tooltip>
-            </Col>
+          <Space size={[10, 10]} wrap>
+            <Input.Group compact>
+              <Select
+                value={filter.type || 'name'}
+                style={{ width: '30%' }}
+                onChange={(type) => setFilter({ ...filter, type })}
+              >
+                <Select.Option value="name">名称</Select.Option>
+                <Select.Option value="no">编号</Select.Option>
+              </Select>
+              <Input.Search
+                allowClear
+                enterButton
+                style={{ width: '70%' }}
+                onSearch={(keyword) =>
+                  setSearch({ ...search, type: filter.type, keyword, page: undefined })
+                }
+              />
+            </Input.Group>
+            <Tooltip title="刷新">
+              <Button type="primary" icon={<RedoOutlined />} onClick={toPaginate} loading={load} />
+            </Tooltip>
             <Authorize permission="dormitory.asset.device.create">
-              <Col>
-                <Tooltip title="创建">
-                  <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
-                </Tooltip>
-              </Col>
+              <Tooltip title="创建">
+                <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
+              </Tooltip>
             </Authorize>
-          </Row>
+          </Space>
         }
       >
         <Table
           dataSource={data}
           rowKey="id"
-          loading={loadingPaginate}
+          loading={load}
           expandable={{
             expandIcon: () => <VerticalLeftOutlined style={{ color: '#1890ff' }} />,
             expandedRowKeys: expands,

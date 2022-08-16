@@ -1,16 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Button,
-  Card,
-  Col,
-  notification,
-  Popconfirm,
-  Row,
-  Switch,
-  Table,
-  Tag,
-  Tooltip,
-} from 'antd';
+import { Button, Card, notification, Popconfirm, Space, Switch, Table, Tag, Tooltip } from 'antd';
 import Constants from '@/utils/Constants';
 import moment from 'moment';
 import { FormOutlined, RedoOutlined } from '@ant-design/icons';
@@ -25,17 +14,17 @@ const List: React.FC = () => {
   const { initialState } = useModel('@@initialState');
 
   const [editor, setEditor] = useState<APIDormitoryStayCategories.Data | undefined>();
-  const [loading, setLoading] = useState(false);
+  const [load, setLoad] = useState(false);
   const [visible, setVisible] = useState<APIDormitoryStayCategories.Visible>({});
   const [data, setData] = useState<APIDormitoryStayCategories.Data[]>();
 
   const toPaginate = () => {
-    setLoading(true);
+    setLoad(true);
     doList()
       .then((response: APIResponse.Response<APIDormitoryStayCategories.Data[]>) => {
         if (response.code === Constants.Success) setData(response.data || []);
       })
-      .finally(() => setLoading(false));
+      .finally(() => setLoad(false));
   };
 
   const onDelete = (record: APIDormitoryStayCategories.Data) => {
@@ -124,28 +113,19 @@ const List: React.FC = () => {
       <Card
         title="类型列表"
         extra={
-          <Row gutter={10}>
-            <Col>
-              <Tooltip title="刷新">
-                <Button
-                  type="primary"
-                  icon={<RedoOutlined />}
-                  onClick={toPaginate}
-                  loading={loading}
-                />
-              </Tooltip>
-            </Col>
+          <Space size={[10, 10]} wrap>
+            <Tooltip title="刷新">
+              <Button type="primary" icon={<RedoOutlined />} onClick={toPaginate} loading={load} />
+            </Tooltip>
             <Authorize permission="dormitory.stay.category.create">
-              <Col>
-                <Tooltip title="创建">
-                  <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
-                </Tooltip>
-              </Col>
+              <Tooltip title="创建">
+                <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
+              </Tooltip>
             </Authorize>
-          </Row>
+          </Space>
         }
       >
-        <Table dataSource={data} rowKey="id" loading={loading} pagination={false}>
+        <Table dataSource={data} rowKey="id" loading={load} pagination={false}>
           <Table.Column title="名称" dataIndex="name" />
           <Table.Column
             title="入住"

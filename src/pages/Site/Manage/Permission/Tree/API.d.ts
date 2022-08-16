@@ -1,4 +1,4 @@
-declare namespace APISiteManagementPermissions {
+declare namespace APISiteManagePermissions {
   type Data = {
     id?: number;
     parents?: number[];

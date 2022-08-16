@@ -1,21 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Button,
-  Card,
-  Col,
-  notification,
-  Popconfirm,
-  Row,
-  Select,
-  Table,
-  Tag,
-  Tooltip,
-} from 'antd';
+import { Button, Card, notification, Popconfirm, Select, Space, Table, Tag, Tooltip } from 'antd';
 import Constants from '@/utils/Constants';
 import { FormOutlined, RedoOutlined } from '@ant-design/icons';
 import { useModel } from '@@/plugin-model/useModel';
 import Authorize from '@/components/Basic/Authorize';
-import Editor from '@/pages/Site/Management/Permission/Editor';
+import Editor from '@/pages/Site/Manage/Permission/Editor';
 import { doDelete, doTree } from './service';
 import Loop from '@/utils/Loop';
 import { doModuleByOnline } from '@/services/site';
@@ -32,13 +21,13 @@ const methods = {
 const Tree: React.FC = () => {
   const { initialState } = useModel('@@initialState');
 
-  const [editor, setEditor] = useState<APISiteManagementPermissions.Data | undefined>();
-  const [loadingPaginate, setLoadingPaginate] = useState(false);
-  const [visible, setVisible] = useState<APISiteManagementPermissions.Visible>({});
-  const [data, setData] = useState<APISiteManagementPermissions.Data[]>();
+  const [editor, setEditor] = useState<APISiteManagePermissions.Data | undefined>();
+  const [load, setLoad] = useState(false);
+  const [visible, setVisible] = useState<APISiteManagePermissions.Visible>({});
+  const [data, setData] = useState<APISiteManagePermissions.Data[]>();
   const [modules, setModules] = useState<APISite.Module[]>([]);
-  const [loading, setLoading] = useState<APISiteManagementPermissions.Loading>({});
-  const [active, setActive] = useState<APISiteManagementPermissions.Active>({});
+  const [loading, setLoading] = useState<APISiteManagePermissions.Loading>({});
+  const [active, setActive] = useState<APISiteManagePermissions.Active>({});
 
   const toModules = () => {
     setLoading({ ...loading, module: true });
@@ -53,15 +42,15 @@ const Tree: React.FC = () => {
   };
 
   const toTree = () => {
-    setLoadingPaginate(true);
+    setLoad(true);
     doTree(active.module)
-      .then((response: APIResponse.Response<APISiteManagementPermissions.Data[]>) => {
+      .then((response: APIResponse.Response<APISiteManagePermissions.Data[]>) => {
         if (response.code === Constants.Success) setData(response.data);
       })
-      .finally(() => setLoadingPaginate(false));
+      .finally(() => setLoad(false));
   };
 
-  const onDelete = (record: APISiteManagementPermissions.Data) => {
+  const onDelete = (record: APISiteManagePermissions.Data) => {
     if (data) {
       const temp = [...data];
       Loop.ById(temp, record.id, (item) => (item.loading_deleted = true));
@@ -91,7 +80,7 @@ const Tree: React.FC = () => {
     setVisible({ ...visible, editor: true });
   };
 
-  const onUpdate = (record: APISiteManagementPermissions.Data) => {
+  const onUpdate = (record: APISiteManagePermissions.Data) => {
     setEditor(record);
     setVisible({ ...visible, editor: true });
   };
@@ -118,58 +107,41 @@ const Tree: React.FC = () => {
       <Card
         title="权限列表"
         extra={
-          <Row gutter={10}>
-            <Col>
-              <Select
-                value={active.module}
-                placeholder="模块"
-                onChange={(value: number) => setActive({ ...active, module: value })}
-              >
-                {modules.map((item) => (
-                  <Select.Option key={item.id} value={item.id}>
-                    {item.name}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Col>
-            <Col>
-              <Tooltip title="刷新">
-                <Button
-                  type="primary"
-                  icon={<RedoOutlined />}
-                  onClick={toTree}
-                  loading={loadingPaginate}
-                />
+          <Space size={[10, 10]} wrap>
+            <Select
+              value={active.module}
+              placeholder="模块"
+              onChange={(value: number) => setActive({ ...active, module: value })}
+            >
+              {modules.map((item) => (
+                <Select.Option key={item.id} value={item.id}>
+                  {item.name}
+                </Select.Option>
+              ))}
+            </Select>
+            <Tooltip title="刷新">
+              <Button type="primary" icon={<RedoOutlined />} onClick={toTree} loading={load} />
+            </Tooltip>
+            <Authorize permission="site.manage.permission.create">
+              <Tooltip title="创建">
+                <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
               </Tooltip>
-            </Col>
-            <Authorize permission="site.management.permission.create">
-              <Col>
-                <Tooltip title="创建">
-                  <Button type="primary" icon={<FormOutlined />} onClick={onCreate} />
-                </Tooltip>
-              </Col>
             </Authorize>
-          </Row>
+          </Space>
         }
       >
-        <Table
-          dataSource={data}
-          rowKey="id"
-          size="small"
-          loading={loadingPaginate}
-          pagination={false}
-        >
+        <Table dataSource={data} rowKey="id" size="small" loading={load} pagination={false}>
           <Table.Column title="名称" dataIndex="name" />
           <Table.Column
             title="标识"
-            render={(record: APISiteManagementPermissions.Data) => (
+            render={(record: APISiteManagePermissions.Data) => (
               <span style={{ color: initialState?.settings?.primaryColor }}>{record.slug}</span>
             )}
           />
           <Table.Column
             title="接口"
             align="right"
-            render={(record: APISiteManagementPermissions.Data) =>
+            render={(record: APISiteManagePermissions.Data) =>
               record.method && (
                 <Tag color={record.method && methods ? methods[record.method] : '#2db7f5'}>
                   {record.method?.toUpperCase()}
@@ -178,7 +150,7 @@ const Tree: React.FC = () => {
             }
           />
           <Table.Column
-            render={(record: APISiteManagementPermissions.Data) =>
+            render={(record: APISiteManagePermissions.Data) =>
               record.path && (
                 <Tag
                   className={styles.path}
@@ -193,14 +165,14 @@ const Tree: React.FC = () => {
             title="操作"
             align="center"
             width={100}
-            render={(record: APISiteManagementPermissions.Data) => (
+            render={(record: APISiteManagePermissions.Data) => (
               <>
-                <Authorize permission="site.management.permission.update">
+                <Authorize permission="site.manage.permission.update">
                   <Button type="link" onClick={() => onUpdate(record)}>
                     编辑
                   </Button>
                 </Authorize>
-                <Authorize permission="site.management.permission.delete">
+                <Authorize permission="site.manage.permission.delete">
                   <Popconfirm
                     title="确定要删除该数据?"
                     placement="leftTop"
