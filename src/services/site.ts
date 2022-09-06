@@ -1,13 +1,13 @@
 import { request } from 'umi';
 
-export async function doModuleByOnline() {
+export async function doSiteModuleByOnline() {
   return request<APIResponse.Response<any>>('/api/admin/site/architecture/module/online');
 }
 
-export async function doApis(module?: number) {
+export async function doSiteApis(module?: number) {
   return request<APIResponse.Response<any>>('/api/admin/site/helper/apis', { params: { module } });
 }
 
-export async function doRoleByEnable() {
-  return request<APIResponse.Response<any>>('/api/admin/site/manage/role/enable');
+export async function doSiteRoleByEnable() {
+  return request<APIResponse.Response<any>>('/api/admin/site/manage/role/online');
 }

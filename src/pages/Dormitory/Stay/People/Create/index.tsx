@@ -3,10 +3,10 @@ import React, { useEffect, useState } from 'react';
 import { doCreate } from './service';
 import Constants from '@/utils/Constants';
 import {
-  doBedByOnline,
-  doFloorByOnline,
-  doRoomByOnline,
-  doStayCategoryByOnline,
+  doDormitoryBedByOnline,
+  doDormitoryFloorByOnline,
+  doDormitoryRoomByOnline,
+  doDormitoryStayCategoryByOnline,
 } from '@/services/dormitory';
 import moment from 'moment';
 import Loop from '@/utils/Loop';
@@ -22,7 +22,7 @@ const Create: React.FC<APIDormitoryStayPeople.Props> = (props) => {
   const isTemp = Form.useWatch('is_temp', former);
 
   const toFloorsByOnline = (id?: number) => {
-    doFloorByOnline(id, { is_public: 2 }).then(
+    doDormitoryFloorByOnline(id, { is_public: 2 }).then(
       (response: APIResponse.Response<APIData.Online[]>) => {
         const data = [...positions];
         Loop.ById(
@@ -49,7 +49,7 @@ const Create: React.FC<APIDormitoryStayPeople.Props> = (props) => {
   };
 
   const toRoomsByOnline = (id?: number) => {
-    doRoomByOnline(id, { is_public: 2 }).then(
+    doDormitoryRoomByOnline(id, { is_public: 2 }).then(
       (response: APIResponse.Response<APIData.Online[]>) => {
         const data = [...positions];
         Loop.ById(
@@ -76,26 +76,28 @@ const Create: React.FC<APIDormitoryStayPeople.Props> = (props) => {
   };
 
   const toBedsByOnline = (id?: number) => {
-    doBedByOnline(id, { is_public: 2 }).then((response: APIResponse.Response<APIData.Online[]>) => {
-      const data = [...positions];
-      Loop.ById(
-        data,
-        id,
-        (item: APIData.Tree) => {
-          item.children = [];
-          if (response.code == Constants.Success) {
-            response.data.forEach((value) => item.children?.push(value));
-          }
-        },
-        'room',
-      );
-      if (data !== positions) setPositions(data);
-    });
+    doDormitoryBedByOnline(id, { is_public: 2 }).then(
+      (response: APIResponse.Response<APIData.Online[]>) => {
+        const data = [...positions];
+        Loop.ById(
+          data,
+          id,
+          (item: APIData.Tree) => {
+            item.children = [];
+            if (response.code == Constants.Success) {
+              response.data.forEach((value) => item.children?.push(value));
+            }
+          },
+          'room',
+        );
+        if (data !== positions) setPositions(data);
+      },
+    );
   };
 
   const toCategoriesByOnline = () => {
     setLoading({ ...loading, category: true });
-    doStayCategoryByOnline()
+    doDormitoryStayCategoryByOnline()
       .then((response: APIResponse.Response<APIDormitory.StayCategory[]>) => {
         if (response.code == Constants.Success) setCategories(response.data);
       })
@@ -193,7 +195,7 @@ const Create: React.FC<APIDormitoryStayPeople.Props> = (props) => {
   return (
     <Modal
       title="办理入住"
-      visible={props.visible}
+      open={props.visible}
       closable={false}
       centered
       onOk={() => former.submit()}

@@ -68,7 +68,7 @@ const Editor: React.FC<APIDormitoryAssetCategory.Props> = (props) => {
   return (
     <Modal
       title={props.params ? '修改' : '创建'}
-      visible={props.visible}
+      open={props.visible}
       closable={false}
       centered
       onOk={() => former.submit()}

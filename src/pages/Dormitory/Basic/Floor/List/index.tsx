@@ -17,7 +17,7 @@ import { FormOutlined, RedoOutlined } from '@ant-design/icons';
 import { useModel } from 'umi';
 import Editor from '@/pages/Dormitory/Basic/Floor/Editor';
 import { doDelete, doEnable, doList } from './service';
-import { doBuildingByOnline } from '@/services/dormitory';
+import { doDormitoryBuildingByOnline } from '@/services/dormitory';
 import Loop from '@/utils/Loop';
 import Authorize from '@/components/Basic/Authorize';
 import Enable from '@/components/Basic/Enable';
@@ -33,7 +33,7 @@ const List: React.FC = () => {
   const [data, setData] = useState<APIDormitoryBasicFloors.Data[]>();
 
   const toBuildingsByOnline = () => {
-    doBuildingByOnline({ is_public: 2 }).then(
+    doDormitoryBuildingByOnline({ is_public: 2 }).then(
       (response: APIResponse.Response<APIData.Online[]>) => {
         if (response.code == Constants.Success) {
           setBuildings(response.data || []);

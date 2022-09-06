@@ -3,14 +3,14 @@ import React, { useEffect, useState } from 'react';
 import { doCreate } from './service';
 import Constants from '@/utils/Constants';
 import {
-  doAssetCategoryByOnline,
-  doAssetDeviceByOnline,
-  doAssetPackageByOnline,
-  doBedByOnline,
-  doBuildingByOnline,
-  doFloorByOnline,
-  doRoomByOnline,
-  doTypeByOnline,
+  doDormitoryAssetCategoryByOnline,
+  doDormitoryAssetDeviceByOnline,
+  doDormitoryAssetPackageByOnline,
+  doDormitoryBedByOnline,
+  doDormitoryBuildingByOnline,
+  doDormitoryFloorByOnline,
+  doDormitoryRoomByOnline,
+  doDormitoryTypeByOnline,
 } from '@/services/dormitory';
 import Loop from '@/utils/Loop';
 import Pattern from '@/utils/Pattern';
@@ -28,7 +28,7 @@ const Create: React.FC<APIDormitoryAssetGrant.Props> = (props) => {
 
   const toTypesByOnline = () => {
     setLoading({ ...loading, buildings: true });
-    doTypeByOnline({ with_bed: true, must_bed: true })
+    doDormitoryTypeByOnline({ with_bed: true, must_bed: true })
       .then((response: APIResponse.Response<APIDormitory.TypeOnline[]>) => {
         if (response.code == Constants.Success) {
           const data: APIData.Tree[] = response.data.map((item) => ({
@@ -45,7 +45,7 @@ const Create: React.FC<APIDormitoryAssetGrant.Props> = (props) => {
 
   const toCategoriesByOnline = () => {
     setLoading({ ...loading, category: true });
-    doAssetCategoryByOnline()
+    doDormitoryAssetCategoryByOnline()
       .then((response: APIResponse.Response<APIData.Online[]>) => {
         if (response.code == Constants.Success) {
           const data: APIData.Tree[] = [];
@@ -60,7 +60,7 @@ const Create: React.FC<APIDormitoryAssetGrant.Props> = (props) => {
 
   const toPackagesByOnline = () => {
     setLoading({ ...loading, packages: true });
-    doAssetPackageByOnline()
+    doDormitoryAssetPackageByOnline()
       .then((response: APIResponse.Response<APIData.Online[]>) => {
         if (response.code == Constants.Success) setPackages(response.data);
       })
@@ -69,7 +69,7 @@ const Create: React.FC<APIDormitoryAssetGrant.Props> = (props) => {
 
   const toBuildingsByOnline = () => {
     setLoading({ ...loading, buildings: true });
-    doBuildingByOnline({ with_public: true })
+    doDormitoryBuildingByOnline({ with_public: true })
       .then((response: APIResponse.Response<APIDormitory.BuildingOnline[]>) => {
         if (response.code == Constants.Success) {
           const data: APIData.Tree[] = [];
@@ -88,7 +88,7 @@ const Create: React.FC<APIDormitoryAssetGrant.Props> = (props) => {
   };
 
   const toDevices = (id?: number) => {
-    doAssetDeviceByOnline(id).then((response: APIResponse.Response<APIData.Online[]>) => {
+    doDormitoryAssetDeviceByOnline(id).then((response: APIResponse.Response<APIData.Online[]>) => {
       if (response.code == Constants.Success) {
         const data = [...devices];
         Loop.ById(data, id, (item: APIData.Tree) => (item.children = response.data), 'category');
@@ -98,7 +98,7 @@ const Create: React.FC<APIDormitoryAssetGrant.Props> = (props) => {
   };
 
   const toFloorsByOnline = (id?: number) => {
-    doFloorByOnline(id, { with_public: true }).then(
+    doDormitoryFloorByOnline(id, { with_public: true }).then(
       (response: APIResponse.Response<APIDormitory.FloorOnline[]>) => {
         const data = [...positions];
         Loop.ById(
@@ -125,7 +125,7 @@ const Create: React.FC<APIDormitoryAssetGrant.Props> = (props) => {
   };
 
   const toRoomsByOnline = (id?: number) => {
-    doRoomByOnline(id, { with_public: true }).then(
+    doDormitoryRoomByOnline(id, { with_public: true }).then(
       (response: APIResponse.Response<APIDormitory.RoomOnline[]>) => {
         const data = [...positions];
         Loop.ById(
@@ -152,7 +152,7 @@ const Create: React.FC<APIDormitoryAssetGrant.Props> = (props) => {
   };
 
   const toBedsByOnline = (id?: number) => {
-    doBedByOnline(id, { with_public: true }).then(
+    doDormitoryBedByOnline(id, { with_public: true }).then(
       (response: APIResponse.Response<APIData.Online[]>) => {
         const data = [...positions];
         Loop.ById(
@@ -264,7 +264,7 @@ const Create: React.FC<APIDormitoryAssetGrant.Props> = (props) => {
   return (
     <Modal
       title="设备派发"
-      visible={props.visible}
+      open={props.visible}
       closable={false}
       centered
       onOk={() => former.submit()}

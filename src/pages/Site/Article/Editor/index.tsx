@@ -196,7 +196,7 @@ const Editor: React.FC<APISiteArticle.Props> = (props) => {
   return (
     <Modal
       width={660}
-      visible={props.visible}
+      open={props.visible}
       closable={false}
       centered
       onOk={onValidator}
@@ -307,7 +307,7 @@ const Editor: React.FC<APISiteArticle.Props> = (props) => {
               >
                 <BraftEditor
                   media={{ uploadFn: toUploadByEditor }}
-                  controls={Constants.Controls()}
+                  // controls={Constants.Controls()}
                   className={styles.braft}
                 />
               </Form.Item>

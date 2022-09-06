@@ -2,7 +2,6 @@
 /* eslint-disable */
 
 declare namespace API {
-
   type Account = {
     username?: string;
     nickname?: string;
@@ -17,22 +16,16 @@ declare namespace API {
     id: number;
     slug: string;
     name: string;
-  }
+  };
 
   type Upload = {
     name?: string;
     url?: string;
-  }
+  };
 
   type Validator = {
     status?: 'success' | 'validating' | 'warning' | 'error';
     message?: string;
-  }
-
-  type LoginResult = {
-    status?: string;
-    type?: string;
-    currentAuthority?: string;
   };
 
   type PageParams = {
@@ -53,41 +46,6 @@ declare namespace API {
     updatedAt?: string;
     createdAt?: string;
     progress?: number;
-  };
-
-  type RuleList = {
-    data?: RuleListItem[];
-    /** 列表的内容总数 */
-    total?: number;
-    success?: boolean;
-  };
-
-  type FakeCaptcha = {
-    code?: number;
-    status?: string;
-  };
-
-  type LoginParams = {
-    username?: string;
-    password?: string;
-    autoLogin?: boolean;
-    type?: string;
-  };
-
-  type ErrorResponse = {
-    /** 业务约定的错误码 */
-    errorCode: string;
-    /** 业务上的错误信息 */
-    errorMessage?: string;
-    /** 业务上的请求是否成功 */
-    success?: boolean;
-  };
-
-  type NoticeIconList = {
-    data?: NoticeIconItem[];
-    /** 列表的内容总数 */
-    total?: number;
-    success?: boolean;
   };
 
   type NoticeIconItemType = 'notification' | 'message' | 'event';

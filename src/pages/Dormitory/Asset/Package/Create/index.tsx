@@ -2,7 +2,10 @@ import { Button, Cascader, Form, Input, Modal, notification } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { doCreate, doUpdate } from './service';
 import Constants from '@/utils/Constants';
-import { doAssetCategoryByOnline, doAssetDeviceByOnline } from '@/services/dormitory';
+import {
+  doDormitoryAssetCategoryByOnline,
+  doDormitoryAssetDeviceByOnline,
+} from '@/services/dormitory';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import Loop from '@/utils/Loop';
 import Pattern from '@/utils/Pattern';
@@ -14,7 +17,7 @@ const Create: React.FC<APIDormitoryAssetPackage.Props> = (props) => {
 
   const toCategoriesByOnline = () => {
     setLoading({ ...loading, category: true });
-    doAssetCategoryByOnline()
+    doDormitoryAssetCategoryByOnline()
       .then((response: APIResponse.Response<APIData.Online[]>) => {
         if (response.code == Constants.Success) {
           const data: APIData.Tree[] = [];
@@ -85,7 +88,7 @@ const Create: React.FC<APIDormitoryAssetPackage.Props> = (props) => {
   };
 
   const toChildren = (id?: number) => {
-    doAssetDeviceByOnline(id).then((response: APIResponse.Response<APIData.Online[]>) => {
+    doDormitoryAssetDeviceByOnline(id).then((response: APIResponse.Response<APIData.Online[]>) => {
       const data = [...devices];
       if (response.code == Constants.Success) {
         Loop.ById(data, id, (item: APIData.Tree) => (item.children = response.data), 'category');
@@ -159,7 +162,7 @@ const Create: React.FC<APIDormitoryAssetPackage.Props> = (props) => {
   return (
     <Modal
       title="设备打包"
-      visible={props.visible}
+      open={props.visible}
       closable={false}
       centered
       onOk={() => former.submit()}

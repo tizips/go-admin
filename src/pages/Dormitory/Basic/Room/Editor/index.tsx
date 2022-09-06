@@ -2,7 +2,7 @@ import { Cascader, Form, Input, Modal, notification, Select, Slider } from 'antd
 import React, { useEffect, useState } from 'react';
 import { doCreate, doUpdate } from './service';
 import Constants from '@/utils/Constants';
-import { doFloorByOnline, doTypeByOnline } from '@/services/dormitory';
+import { doDormitoryFloorByOnline, doDormitoryTypeByOnline } from '@/services/dormitory';
 import Loop from '@/utils/Loop';
 
 const Editor: React.FC<APIDormitoryBasicRoom.Props> = (props) => {
@@ -13,7 +13,7 @@ const Editor: React.FC<APIDormitoryBasicRoom.Props> = (props) => {
   const isPublic = Form.useWatch('is_public', former);
 
   const toFloorsByOnline = (id?: number) => {
-    doFloorByOnline(id, { is_public: 2 }).then(
+    doDormitoryFloorByOnline(id, { is_public: 2 }).then(
       (response: APIResponse.Response<APIData.Online[]>) => {
         const data = [...positions];
         Loop.ById(
@@ -36,7 +36,7 @@ const Editor: React.FC<APIDormitoryBasicRoom.Props> = (props) => {
 
   const toTypesByOnline = () => {
     setLoading({ ...loading, type: true });
-    doTypeByOnline()
+    doDormitoryTypeByOnline()
       .then((response: APIResponse.Response<APIData.Online[]>) => {
         if (response.code == Constants.Success) setTypes(response.data);
       })
@@ -143,7 +143,7 @@ const Editor: React.FC<APIDormitoryBasicRoom.Props> = (props) => {
   return (
     <Modal
       title={props.params ? '修改' : '创建'}
-      visible={props.visible}
+      open={props.visible}
       closable={false}
       centered
       onOk={() => former.submit()}

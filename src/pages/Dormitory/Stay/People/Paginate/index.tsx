@@ -19,7 +19,7 @@ import moment from 'moment';
 import { FormOutlined, RedoOutlined, VerticalLeftOutlined } from '@ant-design/icons';
 import Create from '@/pages/Dormitory/Stay/People/Create';
 import { doDelete, doPaginate } from './service';
-import { doBuildingByOnline, doFloorByOnline } from '@/services/dormitory';
+import { doDormitoryBuildingByOnline, doDormitoryFloorByOnline } from '@/services/dormitory';
 import Loop from '@/utils/Loop';
 import Authorize from '@/components/Basic/Authorize';
 
@@ -35,7 +35,7 @@ const Paginate: React.FC = () => {
   const [expands, setExpands] = useState<any[]>([]);
 
   const toBuildingsByOnline = () => {
-    doBuildingByOnline({ is_public: 2 }).then(
+    doDormitoryBuildingByOnline({ is_public: 2 }).then(
       (response: APIResponse.Response<APIData.Online[]>) => {
         if (response.code == Constants.Success) {
           setBuildings(response.data || []);
@@ -45,7 +45,7 @@ const Paginate: React.FC = () => {
   };
 
   const toFloorsByOnline = (id?: number) => {
-    doFloorByOnline(id, { is_public: 2 }).then(
+    doDormitoryFloorByOnline(id, { is_public: 2 }).then(
       (response: APIResponse.Response<APIData.Online[]>) => {
         const temp = [...positions];
         Loop.ById(

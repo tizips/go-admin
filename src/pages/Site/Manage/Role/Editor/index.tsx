@@ -88,7 +88,7 @@ const Editor: React.FC<APISiteManageRole.Props> = (props) => {
   return (
     <Modal
       title={props.params ? '编辑' : '创建'}
-      visible={props.visible}
+      open={props.visible}
       centered
       onOk={former.submit}
       maskClosable={false}

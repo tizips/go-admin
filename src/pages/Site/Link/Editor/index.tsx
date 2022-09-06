@@ -6,7 +6,6 @@ import { UploadOutlined } from '@ant-design/icons';
 import styles from './index.less';
 
 const Editor: React.FC<APISiteLink.Props> = (props) => {
-
   const init: APISiteLink.Former = {
     name: '',
     uri: '',
@@ -79,16 +78,15 @@ const Editor: React.FC<APISiteLink.Props> = (props) => {
       is_enable: values.is_enable,
     };
 
-
     if (props.params) toUpdate(params);
     else toCreate(params);
   };
 
   const toUpload = (e: any) => {
-
     if (Array.isArray(e)) return e;
 
-    const { status, response }: { status: string; response: APIResponse.Response<API.Upload> } = e.file;
+    const { status, response }: { status: string; response: APIResponse.Response<API.Upload> } =
+      e.file;
     if (status === 'uploading' && !loading.upload) setLoading({ ...loading, upload: true });
     else if (status == 'done') {
       setLoading({ ...loading, upload: false });
@@ -136,73 +134,95 @@ const Editor: React.FC<APISiteLink.Props> = (props) => {
   }, [props.visible]);
 
   return (
-    <Modal width={660} visible={props.visible} closable={false} centered onOk={onValidator}
-           maskClosable={false} onCancel={props.onCancel} className={styles.modal}
-           confirmLoading={loading.confirmed}>
-      <Spin spinning={false} tip='数据加载中...'>
-        <Form form={former} initialValues={init} onFinish={onSubmit}
-              labelCol={{ span: 3 }}>
-          <Tabs activeKey={type} onChange={activeKey => setType(activeKey)}>
-            <Tabs.TabPane key='basic' tab='基本' forceRender>
-              <Form.Item label='名称' name='name' rules={[{ required: true }, { max: 120 }]}>
+    <Modal
+      width={660}
+      open={props.visible}
+      closable={false}
+      centered
+      onOk={onValidator}
+      maskClosable={false}
+      onCancel={props.onCancel}
+      className={styles.modal}
+      confirmLoading={loading.confirmed}
+    >
+      <Spin spinning={false} tip="数据加载中...">
+        <Form form={former} initialValues={init} onFinish={onSubmit} labelCol={{ span: 3 }}>
+          <Tabs activeKey={type} onChange={(activeKey) => setType(activeKey)}>
+            <Tabs.TabPane key="basic" tab="基本" forceRender>
+              <Form.Item label="名称" name="name" rules={[{ required: true }, { max: 120 }]}>
                 <Input />
               </Form.Item>
-              <Form.Item label='链接' name='uri' rules={[{ required: true }, { max: 120 }, { type: 'url' }]}>
+              <Form.Item
+                label="链接"
+                name="uri"
+                rules={[{ required: true }, { max: 120 }, { type: 'url' }]}
+              >
                 <Input />
               </Form.Item>
-              <Form.Item label='排序' name='no' rules={[{ required: true }, { type: 'number' }]}>
+              <Form.Item label="排序" name="no" rules={[{ required: true }, { type: 'number' }]}>
                 <Slider min={1} max={100} />
               </Form.Item>
-              <Form.Item label='启用' name='is_enable' rules={[{ required: true }]}>
+              <Form.Item label="启用" name="is_enable" rules={[{ required: true }]}>
                 <Select>
                   <Select.Option value={1}>是</Select.Option>
                   <Select.Option value={0}>否</Select.Option>
                 </Select>
               </Form.Item>
-              <Form.Item name='summary' label='简介' rules={[{ max: 120 }]}>
+              <Form.Item name="summary" label="简介" rules={[{ max: 120 }]}>
                 <Input.TextArea />
               </Form.Item>
             </Tabs.TabPane>
-            <Tabs.TabPane key='other' tab='其他' forceRender>
-              <Form.Item label='Logo' validateStatus={validator.picture?.status} help={validator.picture?.message}>
+            <Tabs.TabPane key="other" tab="其他" forceRender>
+              <Form.Item
+                label="Logo"
+                validateStatus={validator.picture?.status}
+                help={validator.picture?.message}
+              >
                 <Form.Item noStyle>
                   <Upload
-                    name='file'
-                    listType='picture-card'
+                    name="file"
+                    listType="picture-card"
                     showUploadList={false}
                     action={Constants.Upload}
-                    headers={{ Authorization: localStorage.getItem(Constants.Authorization) as string }}
+                    headers={{
+                      Authorization: localStorage.getItem(Constants.Authorization) as string,
+                    }}
                     data={{ dir: '/category' }}
                     onChange={toUpload}
                   >
-                    <Spin spinning={!!loading.upload} tip='Loading...'>
-                      {
-                        picture ?
-                          <img src={picture} alt='avatar' /> :
-                          <div className={styles.upload}>
-                            <UploadOutlined className='upload-icon' />
-                          </div>
-                      }
+                    <Spin spinning={!!loading.upload} tip="Loading...">
+                      {picture ? (
+                        <img src={picture} alt="avatar" />
+                      ) : (
+                        <div className={styles.upload}>
+                          <UploadOutlined className="upload-icon" />
+                        </div>
+                      )}
                     </Spin>
                   </Upload>
                 </Form.Item>
               </Form.Item>
-              <Form.Item label='位置' name='position' rules={[{ required: true }]}>
+              <Form.Item label="位置" name="position" rules={[{ required: true }]}>
                 <Select>
                   <Select.Option value={0}>全部</Select.Option>
                   <Select.Option value={1}>底部</Select.Option>
                   <Select.Option value={2}>其他</Select.Option>
                 </Select>
               </Form.Item>
-              <Form.Item name='admin' label='站长' rules={[{ max: 20 }]}>
+              <Form.Item name="admin" label="站长" rules={[{ max: 20 }]}>
                 <Input onChange={onChangeAdmin} />
               </Form.Item>
-              {
-                admin ?
-                  <Form.Item name='email' label='邮箱' rules={[{ required: !!admin }, { max: 120 }, { type: 'email' }]}>
-                    <Input />
-                  </Form.Item> : <></>
-              }
+              {admin ? (
+                <Form.Item
+                  name="email"
+                  label="邮箱"
+                  rules={[{ required: !!admin }, { max: 120 }, { type: 'email' }]}
+                >
+                  <Input />
+                </Form.Item>
+              ) : (
+                <></>
+              )}
             </Tabs.TabPane>
           </Tabs>
         </Form>

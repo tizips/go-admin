@@ -2,7 +2,7 @@ import { Cascader, Form, Input, Modal, notification, Select, Tag } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { doCreate, doParents, doUpdate } from './service';
 import Constants from '@/utils/Constants';
-import { doApis } from '@/services/site';
+import { doSiteApis } from '@/services/site';
 
 const Editor: React.FC<APISiteManagePermission.Props> = (props) => {
   const [former] = Form.useForm<APISiteManagePermission.Former>();
@@ -13,7 +13,7 @@ const Editor: React.FC<APISiteManagePermission.Props> = (props) => {
 
   const toApis = () => {
     setLoading({ ...loading, api: true });
-    doApis(props.module)
+    doSiteApis(props.module)
       .then((response: APIResponse.Response<APISiteManagePermission.Api[]>) => {
         if (response.code === Constants.Success) {
           const data = response.data;
@@ -124,7 +124,7 @@ const Editor: React.FC<APISiteManagePermission.Props> = (props) => {
   return (
     <Modal
       title={props.params ? '编辑' : '创建'}
-      visible={props.visible}
+      open={props.visible}
       centered
       onOk={former.submit}
       maskClosable={false}

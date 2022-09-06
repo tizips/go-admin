@@ -7,7 +7,7 @@ import Authorize from '@/components/Basic/Authorize';
 import Editor from '@/pages/Site/Manage/Permission/Editor';
 import { doDelete, doTree } from './service';
 import Loop from '@/utils/Loop';
-import { doModuleByOnline } from '@/services/site';
+import { doSiteModuleByOnline } from '@/services/site';
 
 import styles from './index.less';
 
@@ -31,7 +31,7 @@ const Tree: React.FC = () => {
 
   const toModules = () => {
     setLoading({ ...loading, module: true });
-    doModuleByOnline()
+    doSiteModuleByOnline()
       .then((response: APIResponse.Response<any[]>) => {
         if (response.code === Constants.Success) {
           setModules(response.data);

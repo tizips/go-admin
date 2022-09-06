@@ -4,7 +4,7 @@ import { doCreate, doUpdate } from './service';
 import Constants from '@/utils/Constants';
 import Pattern from '@/utils/Pattern';
 import { useModel } from 'umi';
-import { doRoleByEnable } from '@/services/site';
+import { doSiteRoleByEnable } from '@/services/site';
 
 const Editor: React.FC<APISiteManageAdmin.Props> = (props) => {
   const { initialState } = useModel('@@initialState');
@@ -15,7 +15,7 @@ const Editor: React.FC<APISiteManageAdmin.Props> = (props) => {
 
   const toPermissions = () => {
     setLoading({ ...loading, permission: true });
-    doRoleByEnable()
+    doSiteRoleByEnable()
       .then((response: APIResponse.Response<APISiteManageAdmin.Role[]>) => {
         if (response.code === Constants.Success) {
           setRoles(response.data);
@@ -100,7 +100,7 @@ const Editor: React.FC<APISiteManageAdmin.Props> = (props) => {
   return (
     <Modal
       title={props.params ? '编辑' : '创建'}
-      visible={props.visible}
+      open={props.visible}
       centered
       onOk={former.submit}
       maskClosable={false}

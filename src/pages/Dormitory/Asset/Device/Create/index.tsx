@@ -2,7 +2,7 @@ import { Col, Form, Input, InputNumber, Modal, notification, Row, Select } from 
 import React, { useEffect, useState } from 'react';
 import { doCreate, doUpdate } from './service';
 import Constants from '@/utils/Constants';
-import { doAssetCategoryByOnline } from '@/services/dormitory';
+import { doDormitoryAssetCategoryByOnline } from '@/services/dormitory';
 
 import styles from './index.less';
 
@@ -13,7 +13,7 @@ const Create: React.FC<APIDormitoryAssetDevice.Props> = (props) => {
 
   const toCategoriesByOnline = () => {
     setLoading({ ...loading, category: true });
-    doAssetCategoryByOnline()
+    doDormitoryAssetCategoryByOnline()
       .then((response: APIResponse.Response<APIData.Online[]>) => {
         if (response.code == Constants.Success) setCategories(response.data);
       })
@@ -108,7 +108,7 @@ const Create: React.FC<APIDormitoryAssetDevice.Props> = (props) => {
   return (
     <Modal
       title="办理入住"
-      visible={props.visible}
+      open={props.visible}
       closable={false}
       centered
       onOk={() => former.submit()}
